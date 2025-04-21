@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
-# Create your models here.
+# Create your models here.    
 class CustomUserManager(BaseUserManager):
     """
     Custom user model manager where email is the unique identifiers
@@ -47,6 +47,8 @@ class User(AbstractUser):
     organisation = models.CharField(max_length=100, blank=True, null=True)
     lien_portfolio = models.URLField(blank=True, null=True)
     date_de_creation = models.DateField(auto_now_add=True)
+    bio = models.TextField(blank=True, null=True)
+    expertises = models.TextField(blank=True, null=True)
 
     USERNAME_FIELD = 'email'
 
@@ -63,8 +65,10 @@ class Programme(models.Model):
         ('talk', 'Talk')
     ]
     nom = models.CharField(max_length=100, blank=True, null=True, choices=CHOICES)
+    theme = models.CharField(max_length=100, blank=True, null=True)
     animateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='programmes_animateur')
     edition_du_Tour = models.CharField(max_length=20, blank=True, null=True)
+    statut = models.CharField(max_length=20, default='en_attente')  # 'en_attente', 'confirme', 'annule'
     nb_participants_max = models.IntegerField(default=0)
     participants = models.ManyToManyField(User, related_name='programmes_participant', blank=True)
     temps_de_participation = models.IntegerField(default=0)
@@ -74,3 +78,11 @@ class Programme(models.Model):
 
     def __str__(self):
         return self.nom
+
+class Registration(models.Model):
+    participant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registrations_participant')
+    programme = models.ForeignKey(Programme, on_delete=models.CASCADE, related_name='registrations')
+    date_inscription = models.DateField(auto_now_add=True)
+    statut = models.CharField(max_length=20, default='registre')  # 'registre', 'annule'
+    def __str__(self):
+        return f"{self.user.email} - {self.programme.nom}"
