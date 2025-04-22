@@ -14,10 +14,10 @@ interface FormData {
   telephone: string;
   password: string;
   password2: string;
-  pay: string;
+  pays_residence: string;
   profession: string;
   organisation: string;
-  portfolio: string;
+  lien_portfolio: string;
 }
 
 type Role = "participant" | "animateur" | "";
@@ -35,7 +35,9 @@ function getInitialRoleFromURL(): Role {
 
 export default function Inscription() {
   const { handleSignup, signupError, user } = useAuth();
+
   const [selectedRole, setSelectedRole] = useState<Role>("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<FormData>({
     prenom: "",
     nom: "",
@@ -44,11 +46,12 @@ export default function Inscription() {
     telephone: "",
     password: "",
     password2: "",
-    pay: "",
+    pays_residence: "",
     profession: "",
     organisation: "",
-    portfolio: "",
+    lien_portfolio: "",
   });
+
   const { redirectTo } = useRedirection();
 
   useEffect(() => {
@@ -70,7 +73,9 @@ export default function Inscription() {
     console.log("Form data", formData);
   }
 
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -79,10 +84,18 @@ export default function Inscription() {
     console.log("Form data", formData);
   }
 
+  function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files[0]) {
+      setPhotoFile(e.target.files[0]);
+    } else {
+      setPhotoFile(null);
+    }
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    handleSignup(formData);
+    handleSignup(formData, photoFile);
   };
 
   return (
@@ -121,6 +134,25 @@ export default function Inscription() {
                 onChange={handleChange}
                 required
               />
+            </div>
+            <div className="my-4">
+              <label htmlFor="photo-upload" className="block text-xl mb-2">
+                Photo de profil (facultatif):
+              </label>
+              <Input
+                type="file"
+                id="photo-upload"
+                name="photo"
+                accept="image/*"
+                onChange={handlePhotoChange}
+              />
+              {photoFile && (
+                <img
+                  src={URL.createObjectURL(photoFile)}
+                  alt="Aperçu"
+                  className="mt-2 h-20 w-20 object-cover rounded"
+                />
+              )}
             </div>
             <div className="my-4">
               <p className="mb-2 text-xl">Vous voulez devenir:</p>
@@ -192,8 +224,8 @@ export default function Inscription() {
                 <Input
                   type="text"
                   placeholder="Pays de résidence"
-                  name="pay"
-                  value={formData.pay}
+                  name="pays_residence"
+                  value={formData.pays_residence}
                   onChange={handleChange}
                   required
                 />
@@ -215,8 +247,8 @@ export default function Inscription() {
                 <Input
                   type="url"
                   placeholder="Lien vers votre portfolio, site web ou LinkedIn"
-                  name="portfolio"
-                  value={formData.portfolio}
+                  name="lien_portfolio"
+                  value={formData.lien_portfolio}
                   onChange={handleChange}
                   required
                 />

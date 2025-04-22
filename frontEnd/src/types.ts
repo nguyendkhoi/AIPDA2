@@ -16,6 +16,7 @@ export type GlobalType =
   | "Innovation"
   | "Leadership"
   | "Communication";
+
 export type ParticipationType = "Animateur" | "Participant";
 
 export interface Campaign {
@@ -25,42 +26,42 @@ export interface Campaign {
 
 export interface Week {
   weekNumber: number;
-  sessions: Session[];
+  sessions: Workshop[];
 }
 
-export interface Session {
-  date: Date;
-  type: ProgramType;
-  subType?: AtelierType | TalkType | GlobalType;
-  theme?: string;
-  availableSpots: number;
-  animateurs: Animateur[];
-  description?: string;
+interface User {
   id: string;
-}
-
-export interface Animateur {
-  id: string;
-  name: string;
-  role?: string;
-  bio?: string;
+  nom: string;
+  role: string;
   photo?: string;
 }
 
 export interface Workshop {
+  durationHours?: number;
   id: string;
-  animateurId: string; // Correspond à `animator_id`
-  animateurNom: string; // Correspond à `animator_name`
-  edition: string; // Correspond à `campaign_month`
-  program: string; // Correspond à `type`
+  edition_du_Tour: string; // Correspond à `campaign_month`
+  nom: string; // Correspond à `type`
   theme: string; // Correspond à `subtype`
   title: string; // Ajout pour `title`
   description: string; // Ajout pour `description`
-  maxParticipants: number; // Correspond à `max_participants`
+  nb_participants_max: number; // Correspond à `max_participants`
   nb_participants_actuel: number; // Correspond à `nb_participants_actuel`
   statut: string; // Correspond à `status`
   createdAt: string; // Correspond à `created_at`
   date_de_debut: string; // Correspond à `start_date`
+  animateur: User;
+}
+
+export interface Session {
+  id: number;
+  date: Date;
+  type: ProgramType;
+  theme: string | null;
+  availableSpots: number;
+  currentParticipants: number;
+  animateur: User;
+  description?: string;
+  durationHours: string | null;
 }
 
 export type Edition = "Avril 2025" | "Juin 2025" | "Août 2025";

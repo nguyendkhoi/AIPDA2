@@ -1,27 +1,14 @@
+import React from "react";
 import { Award, Calendar, Edit2, Loader2, LogOut, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "./Context/AuthContext";
 import participants from "../assets/icons/participants.svg";
-// Interface pour les propriétés du composant ProfilePage
-// L'utilisateur peut être null si non connecté ou si les données ne sont pas encore chargées
-interface ProfilePageProps {
-  user: { id: string; name: string; email: string } | null;
-  participationType: string | null;
-  onLogout?: () => void; // Fonction pour gérer la déconnexion
-}
 
-// Composant ProfilePage
-const ProfilePage = ({
-  user,
-  participationType,
-  onLogout,
-}: ProfilePageProps) => {
-  console.log("user is ", user); // Log pour débogage
+const ProfilePage = () => {
+  const { authToken, API_BASE_URL, setUser, user, handleLogout } = useAuth();
 
-  // États locaux pour gérer l'interface utilisateur et les données du profil
-  const { authToken, API_BASE_URL, setUser } = useAuth();
+  const [name, setName] = useState(user?.name || "Utilisateur");
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user?.name || "Avatar");
   const [bio, setBio] = useState("");
   const [expertise, setExpertise] = useState<string>();
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -36,14 +23,9 @@ const ProfilePage = ({
     if (user?.id) {
       fetchUserData();
     } else {
-      // Si l'utilisateur n'est pas défini, arrêter le chargement
-      // Peut-être afficher un message ou rediriger, selon le cas d'usage
       setIsLoading(false);
-      setError("Utilisateur non trouvé.");
-      console.log("User or user ID is missing, cannot fetch data.");
     }
-    // Le tableau de dépendances inclut user?.id pour réagir au changement d'utilisateur
-  }, [user?.id]); // Utilisation de l'optional chaining pour la dépendance
+  }, [user?.id]);
 
   // Fonction asynchrone pour récupérer les données de l'utilisateur depuis le backend
   const fetchUserData = async () => {
@@ -75,7 +57,7 @@ const ProfilePage = ({
       setExpertise(userData.expertise || []);
 
       // Charger les inscriptions OU les propositions selon le type de participation
-      if (participationType === "participant") {
+      if (user.role === "participant") {
         const regsResponse = await fetch(`${API_BASE_URL}/api/registrations`, {
           method: "GET",
           headers: { Authorization: `Token ${authToken}` },
@@ -96,29 +78,11 @@ const ProfilePage = ({
           ]
         );
       } else {
-        // Si ce n'est pas un participant, c'est un Animateur/Speaker etc.
-        // TODO: Remplacer par un appel API pour obtenir les propositions
-        // const propsResponse = await fetch(
-        //   `${API_BASE_URL}/api/programme/get_programmes`
-        // );
-        // const propsData = await propsResponse.json();
-        // setProposals(propsData || []);
-
-        const simulatedProposals = [
-          {
-            nom: "Introduction à GraphQL",
-            description: "Présentation des bases de GraphQL.",
-            statut: "approved",
-            date_de_creation: new Date().toISOString(),
-            theme: "Conférence",
-            date_de_debut: [new Date().toISOString()],
-            temps_de_participation: "1h30",
-            edition_du_Tour: "Avril 2025",
-            nb_participants_max: 100,
-            nb_participants_actuel: 50,
-          },
-        ];
-        setProposals(simulatedProposals);
+        const propsResponse = await fetch(
+          `${API_BASE_URL}/api/programme/animateur_programmes`
+        );
+        const propsData = await propsResponse.json();
+        setProposals(propsData || []);
       }
 
       // --- Fin de la section à remplacer par l'appel à votre API backend ---
@@ -306,7 +270,7 @@ const ProfilePage = ({
                   </p>
                   {/* Afficher le type de participation */}
                   <span className="inline-flex items-center px-3 py-1 mt-2 rounded-full bg-indigo-500/50 text-sm">
-                    {participationType || "Type non défini"}
+                    {user.role || "Type non défini"}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -318,10 +282,10 @@ const ProfilePage = ({
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
-                  {/* Bouton de déconnexion (si la fonction onLogout est fournie) */}
-                  {onLogout && (
+                  {/* Bouton de déconnexion (si la fonction handleLogout est fournie) */}
+                  {handleLogout && (
                     <button
-                      onClick={onLogout}
+                      onClick={handleLogout}
                       className="p-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 transition"
                       title="Se déconnecter"
                     >
@@ -347,7 +311,7 @@ const ProfilePage = ({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required // Champ requis
+                      required
                     />
                   </div>
 
@@ -444,7 +408,7 @@ const ProfilePage = ({
                   <section>
                     <h2 className="text-xl font-semibold mb-4 flex items-center">
                       {/* Titre et icône dynamique selon le type de participation */}
-                      {participationType === "participant" ? (
+                      {user.role === "participant" ? (
                         <>
                           <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
                           Mes inscriptions
@@ -459,7 +423,7 @@ const ProfilePage = ({
 
                     <div className="space-y-4">
                       {/* Affichage conditionnel : liste des inscriptions OU liste des propositions */}
-                      {participationType === "participant" ? (
+                      {user.role === "participant" ? (
                         // Affichage des inscriptions
                         registrations.length > 0 ? (
                           registrations.map((reg) => (

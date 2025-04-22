@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics, status, viewsets, permissions
-from .serializers import UserSerializers, ProgrammeSerializers, RegistrationSerializers, UserProfileSerializers, ProgrammeSpecificSerializer
+from .permissions import IsAnimateur, IsParticipant, IsAnimateurOwnerOrReadOnly, IsAnimateurOrParticipantReadOnly
+from .serializers import UserSerializers, ProgrammeSerializers, RegistrationSerializers, UserProfileSerializers, ProgrammeSpecificSerializer, UserDetailSerializer
 from .models import User, Programme, Registration
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -11,26 +12,25 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework.decorators import action
 
+
 # Create your views here.
 class UserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializers
-
+    permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
-        print("Request data:", request.data) 
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            print("Validation errors:", serializer.errors)  # Log validation errors
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-        print("Response data:", serializer.data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class LoginView(ObtainAuthToken):
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
-        print("Request login data:", request.data)
         email = request.data.get('email')
         password = request.data.get('password')
 
@@ -57,95 +57,117 @@ class LoginView(ObtainAuthToken):
                 'id': user.pk,
                 'email': user.email,
                 'role': user.role,
-                'user_metadata': {
-                    'name': user.nom,   
-                }
+                'nom': user.nom,   
             }
         }
-        print("Response login data:", response_data) 
-
         return Response(response_data, status=status.HTTP_200_OK)
     
 class ProgrammeView(viewsets.ModelViewSet):
-    queryset = Programme.objects.all()
+    queryset = Programme.objects.all().select_related('animateur').prefetch_related('participants') 
     serializer_class = ProgrammeSerializers
 
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated, IsAnimateur]
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            permission_classes = [IsAuthenticated, IsAnimateurOwnerOrReadOnly]
+        elif self.action in ['add_participant', 'remove_participant']:
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'get_participant_programmes':
+            permission_classes = [IsAuthenticated, IsParticipant]
+        elif self.action == 'get_animateur_programmes':
+            permission_classes = [IsAuthenticated, IsAnimateur]
+        elif self.action in ['list', 'retrieve']:
+            permission_classes = [IsAuthenticated, IsAnimateurOrParticipantReadOnly]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+    
     def perform_create(self, serializer):
-        user = self.request.user
-        if not user.is_authenticated:
-            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
-        if user.role != 'animateur':
-            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
-        serializer.save(animateur=user)
+        serializer.save(animateur=self.request.user)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+
+    @action(detail=True, methods=['post'])
     def add_participant(self, request, pk=None):
         programme = self.get_object()
         user = request.user
 
-        if(user not in programme.participants.all()):
+        if programme.participants.count() >= programme.nb_participants_max:
+             return Response({'status': 'Programme is full'}, status=status.HTTP_400_BAD_REQUEST)
+        if user not in programme.participants.all():
             programme.participants.add(user)
+            Registration.objects.get_or_create(participant=user, programme=programme, defaults={'statut': 'inscrit'})
             return Response({'status': 'Participant added'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': 'User already a participant'}, status=status.HTTP_400_BAD_REQUEST)
+
         
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def remove_participant(self, request, pk=None):
         programme = self.get_object()
         user = request.user
 
         if(user in programme.participants.all()):
             programme.participants.remove(user)
+            Registration.objects.filter(participant=user, programme=programme).delete()
             return Response({'status': 'Participant removed'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': 'User not a participant'}, status=status.HTTP_400_BAD_REQUEST)
         
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], url_path='participant-programmes')
     def get_participant_programmes(self, request):
         user = request.user
-        programmes = Programme.objects.none()
-        if not user.is_authenticated:
-            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
-        if user.role == 'participant':
-            programmes = Programme.objects.filter(participants=user)
-        else:
-            return Response({"error": "Invalid role."}, status=status.HTTP_400_BAD_REQUEST)
-
+        programmes = Programme.objects.filter(participants=user).select_related('animateur').prefetch_related('participants')
+        
         serializer = ProgrammeSpecificSerializer(programmes, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], url_path='animateur-programmes')
     def get_animateur_programmes(self, request):
-        # Print authentication information for debugging
-        print(f"User authenticated: {request.user.is_authenticated}")
-        print(f"User: {request.user}")
-        
         user = request.user
-        programmes = Programme.objects.none()
-        
-        if not user.is_authenticated:
-            print("User not authenticated")
-            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        print(f"User role: {getattr(user, 'role', 'No role attribute')}")
-        
-        if getattr(user, 'role', None) == 'animateur':
-            programmes = Programme.objects.filter(animateur=user)
-            print(f"Found {programmes.count()} programmes for animateur")
-        else:
-            print(f"Invalid role or no role attribute")
-            return Response({"error": "Invalid role."}, status=status.HTTP_400_BAD_REQUEST)
+        programmes = self.get_queryset().filter(animateur=user)
 
         serializer = ProgrammeSerializers(programmes, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
+    def destroy(self, request, pk=None):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+        if user.role != 'animateur':
+            return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            programme = self.get_object()
+            programme.registrations.update(statut='annule')
+            self.perform_destroy(programme)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Programme.DoesNotExist:
+            return Response({"error": "Programme not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    def patch(self, request, pk=None):
+        try:
+            instance = self.get_object()
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except serializers.ValidationError as e:
+             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+             return Response({"detail": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-
     def post(self, request):
-        print("Logout request received")
         try:
             request.user.auth_token.delete()
             return Response({"message": "Logged out successfully."}, status=status.HTTP_200_OK)
@@ -157,10 +179,9 @@ class LogoutView(APIView):
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-
     def get(self, request):
         user = request.user
-        serializer = UserSerializers(user)
+        serializer = UserDetailSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def patch(self, request):
@@ -178,7 +199,8 @@ class RegistrationView(APIView):
 
     def get(self, request):
         user = request.user
-        registrations = Registration.objects.filter(participant=user)
+        registrations = Registration.objects.filter(participant=user)\
+                                           .select_related('programme')
         serializer = RegistrationSerializers(registrations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

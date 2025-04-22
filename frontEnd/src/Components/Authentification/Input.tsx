@@ -2,7 +2,7 @@ import { useState, ChangeEvent, FocusEvent, InputHTMLAttributes } from "react";
 import "./Input.css";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  placeholder: string;
+  placeholder?: string;
   autocomplete?: string;
 }
 

@@ -3,9 +3,9 @@ import ProgramsDashboard from "../ProgramsDashboard.tsx";
 import { Navigate } from "react-router-dom";
 
 const ProgramsDashBoardRoute = () => {
-  const { participationType } = useAuth();
-  console.log("what is participation type ", participationType);
-  return participationType === "animateur" ? (
+  const { user } = useAuth();
+  console.log("what is participation type ", user?.role);
+  return user?.role === "animateur" ? (
     <ProgramsDashboard />
   ) : (
     <Navigate to={"/"} replace />

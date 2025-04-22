@@ -17,7 +17,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { participationType, user, handleLogout } = useAuth();
+  const { user, handleLogout } = useAuth();
 
   const { redirectTo } = useRedirection();
   useEffect(() => {
@@ -59,7 +59,7 @@ const Navbar = () => {
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               <button
-                onClick={() => {}}
+                onClick={() => redirectTo("/programs")}
                 className={`flex items-center transition text-gray-700 hover:text-indigo-600`}
               >
                 <Calendar className="inline-block w-4 h-4 mr-1" />
@@ -72,7 +72,7 @@ const Navbar = () => {
                 <Users className="inline-block w-4 h-4 mr-1" />
                 Communauté
               </button>
-              {participationType === "animateur" && (
+              {user?.role === "animateur" && (
                 <button
                   onClick={() => redirectTo("/createPrograms")}
                   className={`flex items-center transition text-gray-700 hover:text-indigo-600`}

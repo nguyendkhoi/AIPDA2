@@ -1,11 +1,20 @@
 from rest_framework import serializers
 from .models import User, Programme, Registration
 
+# User
+class NestedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'prenom', 'nom', 'role']
+        read_only_fields = fields
+
 class UserSerializers(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ['id', 'email', 'prenom', 'nom', 'role', 'telephone', 'pays_residence', 'bio','expertises', 'profession', 'organisation', 'lien_portfolio', 'date_de_creation', 'password', 'password2']
+        fields = ['id', 'email', 'prenom', 'nom', 'role', 'telephone',
+                   'pays_residence', 'bio','expertises', 'profession', 'photo',
+                     'organisation', 'lien_portfolio', 'date_de_creation', 'password', 'password2']
         extra_kwargs = {
             'password': {'write_only': True},
             'id': {'read_only': True},
@@ -31,13 +40,29 @@ class UserSerializers(serializers.ModelSerializer):
 
 
         return user
+    
+class UserProfileSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['nom', 'bio', 'expertises']   
 
+class UserDetailSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = User
+        fields = ['id', 'email', 'prenom', 'nom', 'role', 'telephone', 'pays_residence', 'bio','expertises', 'profession', 'organisation', 'lien_portfolio', 'date_de_creation']
+        read_only_fields = fields
+        
+# Programme
 class ProgrammeSerializers(serializers.ModelSerializer):
-    animateur = UserSerializers(read_only=True)
-    participants = UserSerializers(many=True, read_only=True)
+    animateur = NestedUserSerializer(read_only=True)
+    participants = NestedUserSerializer(many=True, read_only=True)
+    nb_participants_actuel = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Programme
-        fields = ['id', 'nom', 'animateur', 'statut', 'edition_du_Tour', 'nb_participants_max', 'participants', 'temps_de_participation', 'theme', 'date_de_debut', 'description', 'date_de_creation']
+        fields = ['id', 'nom', 'animateur', 'statut', 'edition_du_Tour', 'nb_participants_actuel',
+                  'nb_participants_max', 'participants', 'temps_de_participation', 
+                  'theme', 'date_de_debut', 'description', 'date_de_creation']
         extra_kwargs = {
             'id': {'read_only': True},
             'statut': {'required': False}
@@ -48,37 +73,26 @@ class ProgrammeSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError("Le nom du programme est requis.")
         if (value.lower() not in ['webinaire', 'atelier', 'talk']):
             raise serializers.ValidationError("Le nom du programme doit être 'webinaire', 'atelier' ou 'talk'.")
-        return value.lower()
+        return value
+    
     def validate(self, data):
         if data['nb_participants_max'] < 0:
             raise serializers.ValidationError("Le nombre de participants maximum ne peut pas être négatif.")
         return data
+    
     def create(self, validated_data):
         programme = Programme.objects.create(**validated_data)
         return programme
-
-    def update(self, instance, validated_data):
-        participants_data = validated_data.pop('participants', [])
-        instance.nom = validated_data.get('nom', instance.nom)
-        instance.animateur = validated_data.get('animateur', instance.animateur)
-        instance.edition_du_Tour = validated_data.get('edition_du_Tour', instance.edition_du_Tour)
-        instance.nb_participants_max = validated_data.get('nb_participants_max', instance.nb_participants_max)
-        instance.temps_de_participation = validated_data.get('temps_de_participation', instance.temps_de_participation)
-        instance.date_de_debut = validated_data.get('date_de_debut', instance.date_de_debut)
-        instance.description = validated_data.get('description', instance.description)
-
-        # Mettre à jour les participants
-        if participants_data:
-            instance.participants.clear()
-            for participant_data in participants_data:
-                instance.participants.add(participant_data)
-
-        instance.save()
-        return instance
+    
+    def get_nb_participants_actuel(self, obj):
+        if hasattr(obj, 'participants') and obj.participants.exists():
+             return obj.participants.count()
+        elif hasattr(obj, '_prefetched_objects_cache') and 'participants' in obj._prefetched_objects_cache:
+             return len(obj._prefetched_objects_cache['participants'])
+        return 0
 
 class ProgrammeSpecificSerializer(serializers.ModelSerializer):
-    participants = UserSerializers(many=True, read_only=True)
-
+    participants = NestedUserSerializer(many=True, read_only=True)
     nb_participants_actuel = serializers.SerializerMethodField()
 
     class Meta:
@@ -98,28 +112,23 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
         ]
 
     def get_nb_participants_actuel(self, obj):
-        """
-        Contabilise le nombre de participants actuels pour un programme donné.
-        """
-        if hasattr(obj, 'participants'):
-            return obj.participants.count()
-        return 0 
+        if hasattr(obj, '_prefetched_objects_cache') and 'participants' in obj._prefetched_objects_cache:
+             return len(obj._prefetched_objects_cache['participants'])
+        elif hasattr(obj, 'participants'):
+             return obj.participants.count()
+        return 0
     
 class NestedProgramme(serializers.ModelSerializer):
     class Meta:
         model = Programme
         fields = ['id', 'nom', 'edition_du_Tour', 'date_de_debut']
         read_only_fields = fields
-    
+
+# Registration
 class RegistrationSerializers(serializers.ModelSerializer):
-    programme = ProgrammeSerializers(source='programme', read_only=True)
+    programme = NestedProgramme(read_only=True)
 
     class Meta:
         model = Registration
         fields = ['programme', "statut", "date_inscription"]
         read_only_fields = fields
-
-class UserProfileSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['nom', 'bio', 'expertises']   
