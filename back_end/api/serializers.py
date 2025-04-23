@@ -5,7 +5,7 @@ from .models import User, Programme, Registration
 class NestedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'prenom', 'nom', 'role']
+        fields = ['id', 'email', 'prenom', 'nom', 'role', 'photo']
         read_only_fields = fields
 
 class UserSerializers(serializers.ModelSerializer):
