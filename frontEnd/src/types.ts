@@ -32,6 +32,7 @@ export interface Week {
 interface User {
   id: string;
   nom: string;
+  prenom?: string;
   role: string;
   photo?: string;
 }
