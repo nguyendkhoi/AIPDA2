@@ -34,7 +34,7 @@ interface AuthContextProps {
   userWorkshop: Workshop[];
   setUserWorkshop: (workshop: Workshop[]) => void;
   API_BASE_URL?: string;
-  handleReservation: (programId: number) => Promise<void>;
+  handleReservation: (programId: number, onSucces: () => void) => Promise<void>;
   setSelectedProgramForView: (session: Session | null) => void;
   selectedProgramForView: Session | null;
 }
@@ -210,14 +210,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     navigate("/");
   };
 
-  const handleReservation = async (programId: number) => {
+  const handleReservation = async (
+    programId: number,
+    onSucces?: () => void
+  ) => {
     if (!authToken) {
       console.error(
         "L'utilisateur n'est pas authentifié. Impossible de réserver un programme."
       );
       return;
     }
-    if (user?.role !== "Participant") {
+    console.log("role utilisateur", user?.role);
+
+    if (user?.role !== "participant") {
       console.error("Seuls les participants peuvent réserver un programme.");
       return;
     }
@@ -235,6 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (response.ok) {
         const data = await response.json();
+        onSucces && onSucces();
         console.log("Réservation réussie :", data);
       } else {
         console.error("Error during API call:", response);
