@@ -56,7 +56,8 @@ export function ProgramCard({ session, onReserve, onView }: ProgramCardProps) {
       {/* Actions */}
       <div className="flex gap-2 mt-4">
         <button
-          onClick={onReserve}
+          onClick={() => onReserve()}
+          disabled={session.currentParticipants >= session.availableSpots}
           className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
         >
           Réserver

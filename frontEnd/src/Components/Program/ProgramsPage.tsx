@@ -40,7 +40,7 @@ const ProgramsPage = () => {
 
     setIsLoading(true);
     setError(null);
-    setApiWorkshops([]);
+    // setApiWorkshops([]);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/programme/`, {
@@ -62,7 +62,7 @@ const ProgramsPage = () => {
       }
 
       const data = await response.json();
-      console.log("API Response Data:", data);
+      // console.log("API Response Data:", data);
       setApiWorkshops(data || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des programmes:", err);
@@ -115,8 +115,10 @@ const ProgramsPage = () => {
         ? {
             id: workshop.animateur.id,
             nom:
-              ` ${workshop.animateur.nom || ""}`.trim() || "Animateur Inconnu",
-            // photo: workshop.animateur.photo || 'URL_PHOTO_DEFAULT' // Thêm nếu có
+              `${workshop.animateur.nom || ""} ${
+                workshop.animateur.prenom || ""
+              }`.trim() || "Animateur Inconnu",
+            photo: workshop.animateur.photo || "null",
             role: workshop.animateur.role,
           }
         : { id: "", nom: "Animateur Inconnu", role: "" },
@@ -211,7 +213,7 @@ const ProgramsPage = () => {
                           if (!user) {
                             window.location.href = "/inscription";
                           } else {
-                            handleReservation(session.id);
+                            handleReservation(session.id, getWorkshopsFromApi);
                           }
                         }}
                         onView={() => setSelectedProgramForView(session)}
