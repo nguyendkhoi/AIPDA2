@@ -242,6 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const data = await response.json();
         onSucces && onSucces();
         console.log("Réservation réussie :", data);
+        alert("Reservation reussi")
       } else {
         console.error("Error during API call:", response);
         const errorMessage = await response.text();
