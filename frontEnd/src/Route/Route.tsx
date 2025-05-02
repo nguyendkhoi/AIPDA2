@@ -7,6 +7,7 @@ import ProfileRoute from "../Components/RouteProtected/ProfileRoute.tsx";
 import LandingPage2 from "../Components/LandingPage2/LandingPage2.tsx";
 import ProgramsPage from "../Components/Program/ProgramsPage.tsx";
 import ProgramsDashBoardRoute from "../Components/RouteProtected/ProgramsDashBoardRoute.tsx";
+import CommunityPage from "../Components/communaute/CommutyPages.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
       {
         path: "programs",
         element: <ProgramsPage />,
+      },  
+      {
+        path: "community",
+        element: <CommunityPage/>,
       },
     ],
     errorElement: <p>Erreur 404</p>,

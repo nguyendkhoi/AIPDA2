@@ -63,8 +63,12 @@ const ProfilePage = () => {
           headers: { Authorization: `Token ${authToken}` },
         });
         const regsData2 = await regsResponse.json();
+
+        console.log("data des registrations est :",regsData2)
+
+        
         setRegistrations(
-          null || [
+          regsData2 || [
             {
               id: "reg1",
               programs: {
@@ -188,6 +192,7 @@ const ProfilePage = () => {
     ) {
       case "confirmed":
       case "approved":
+      case "inscrit":
         return "bg-green-100 text-green-700";
       case "pending":
         return "bg-yellow-100 text-yellow-700";
@@ -428,20 +433,20 @@ const ProfilePage = () => {
                         registrations.length > 0 ? (
                           registrations.map((reg) => (
                             <div
-                              key={reg.id}
+                              key={reg.programme.id}
                               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
                             >
                               <div className="flex justify-between items-start">
                                 <div>
                                   <h3 className="font-semibold text-lg">
                                     {/* Utiliser optional chaining au cas où programs serait manquant */}
-                                    {reg.programs?.nom || "Titre indisponible"}
+                                    {reg.programme?.nom || "Titre indisponible"}
                                   </h3>
                                   <p className="text-sm text-gray-600">
-                                    {reg.programs?.edition_du_Tour}
+                                    {reg.programme?.edition_du_Tour}
                                   </p>
                                   <p className="text-sm text-gray-500 mt-2">
-                                    {formatDate(reg.programs?.date_de_debut) ||
+                                    {formatDate(reg.programme?.date_de_debut) ||
                                       "Type inconnu"}
                                   </p>
                                 </div>
