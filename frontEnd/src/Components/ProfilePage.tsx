@@ -63,6 +63,10 @@ const ProfilePage = () => {
           headers: { Authorization: `Token ${authToken}` },
         });
         const regsData2 = await regsResponse.json();
+
+        console.log("data des registrations est :",regsData2)
+
+        
         setRegistrations(
           regsData2 || [
             {
@@ -429,7 +433,7 @@ const ProfilePage = () => {
                         registrations.length > 0 ? (
                           registrations.map((reg) => (
                             <div
-                              key={reg.id}
+                              key={reg.programme.id}
                               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
                             >
                               <div className="flex justify-between items-start">

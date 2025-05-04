@@ -60,14 +60,14 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => redirectTo("/programs")}
-                className={`flex items-center transition text-gray-700 hover:text-indigo-600`}
+                className={`flex items-center transition text-gray-700 hover:text-indigo-600 cursor-pointer`}
               >
                 <Calendar className="inline-block w-4 h-4 mr-1" />
                 Programmes
               </button>
               <button
                 onClick={() => redirectTo("/community")}
-                className={`flex items-center transition text-gray-700 hover:text-indigo-600`}
+                className={`flex items-center transition text-gray-700 hover:text-indigo-600 cursor-pointer`}
               >
                 <Users className="inline-block w-4 h-4 mr-1" />
                 Communauté
@@ -75,7 +75,7 @@ const Navbar = () => {
               {user?.role === "animateur" && (
                 <button
                   onClick={() => redirectTo("/createPrograms")}
-                  className={`flex items-center transition text-gray-700 hover:text-indigo-600`}
+                  className={`flex items-center transition text-gray-700 hover:text-indigo-600 cursor-pointer`}
                 >
                   <SquarePlus className="inline-block w-4 h-4 mr-1" />
                   Créer un programmes
@@ -104,7 +104,7 @@ const Navbar = () => {
                           setIsUserMenuOpen(false);
                           redirectTo("/profile");
                         }}
-                        className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-50 transition"
+                        className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-50 transition cursor-pointer"
                       >
                         <User className="w-4 h-4 mr-2" />
                         Mon profil
@@ -115,7 +115,7 @@ const Navbar = () => {
                           setIsUserMenuOpen(false);
                           redirectTo("/dashboard");
                         }}
-                        className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-50 transition"
+                        className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-50 transition cursor-pointer"
                       >
                         <LayoutDashboard className="w-4 h-4 mr-2" />
                         DashBoard
@@ -142,7 +142,7 @@ const Navbar = () => {
                     onClick={() => {
                       redirectTo("/connexion");
                     }}
-                    className="text-gray-700 hover:text-indigo-600 transition flex items-center"
+                    className="text-gray-700 hover:text-indigo-600 transition flex items-center cursor-pointer"
                   >
                     <LogIn className="w-4 h-4 mr-1" />
                     Se connecter
@@ -151,7 +151,7 @@ const Navbar = () => {
                     onClick={() => {
                       redirectTo("/inscription");
                     }}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center cursor-pointer"
                   >
                     <User className="w-4 h-4 mr-1" />
                     S'inscrire
@@ -188,7 +188,7 @@ const Navbar = () => {
                   onClick={() => {
                     setIsMenuOpen(false);
                   }}
-                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md"
+                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md cursor-pointer"
                 >
                   <Calendar className="inline-block w-4 h-4 mr-1" />
                   Programmes
@@ -197,7 +197,7 @@ const Navbar = () => {
                   onClick={() => {
                     setIsMenuOpen(false);
                   }}
-                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md"
+                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md cursor-pointer"
                 >
                   <Users className="inline-block w-4 h-4 mr-1" />
                   Communauté
@@ -244,7 +244,7 @@ const Navbar = () => {
                         //setIsLoginModalOpen(true);
                         setIsMenuOpen(false);
                       }}
-                      className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md"
+                      className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md "
                     >
                       <LogIn className="inline-block w-4 h-4 mr-1" />
                       Se connecter
