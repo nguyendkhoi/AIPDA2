@@ -224,6 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (user?.role !== "participant") {
       console.error("Seuls les participants peuvent réserver un programme.");
+      alert("Seuls les participants peuvent réserver un programme.");
       return;
     }
     try {
@@ -242,6 +243,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const data = await response.json();
         onSucces && onSucces();
         console.log("Réservation réussie :", data);
+        alert("Reservation reussi");
       } else {
         console.error("Error during API call:", response);
         const errorMessage = await response.text();

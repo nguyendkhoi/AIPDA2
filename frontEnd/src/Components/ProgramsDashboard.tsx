@@ -442,12 +442,10 @@ const ProgramsDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* ****** UPDATE Form onSubmit ****** */}
             <form
               onSubmit={editingWorkshopId ? handleUpdate : handleSubmit}
               className="space-y-4"
             >
-              {/* Form fields remain the same, populated by formData */}
               <div>
                 <label
                   htmlFor="edition_du_Tour"
@@ -460,8 +458,7 @@ const ProgramsDashboard: React.FC = () => {
                   name="edition_du_Tour"
                   value={formData.edition_du_Tour}
                   onChange={handleChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full pl-3 pr-8 py-1 text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white"
                 >
                   {EDITIONS.map((edition) => (
                     <option key={edition} value={edition}>
@@ -483,7 +480,7 @@ const ProgramsDashboard: React.FC = () => {
                   value={formData.nom}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full pl-3 pr-8 py-1 text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white"
                 >
                   <option value="">-- Choisir --</option>
                   {PROGRAMS.map((program) => (
@@ -507,7 +504,7 @@ const ProgramsDashboard: React.FC = () => {
                   value={formData.date_de_debut}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-4 py-1 text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               <div>
@@ -523,7 +520,7 @@ const ProgramsDashboard: React.FC = () => {
                   value={formData.theme}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full pl-3 pr-8 py-1 text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white"
                 >
                   <option value="">-- Choisir --</option>
                   {THEMES.map((theme) => (
@@ -547,7 +544,7 @@ const ProgramsDashboard: React.FC = () => {
                   value={formData.description}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                 ></textarea>
               </div>
               <div>
@@ -565,7 +562,7 @@ const ProgramsDashboard: React.FC = () => {
                   onChange={handleChange}
                   min={1}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full px-3 py-1 text-base rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 

@@ -64,10 +64,10 @@ const ProfilePage = () => {
         });
         const regsData2 = await regsResponse.json();
         setRegistrations(
-          null || [
+          regsData2 || [
             {
               id: "reg1",
-              programs: {
+              programme: {
                 nom: "Programme 1",
                 edition_du_Tour: "Avril 2025",
                 date_de_debut: new Date(Date.now() - 86400000).toISOString(),
@@ -188,6 +188,7 @@ const ProfilePage = () => {
     ) {
       case "confirmed":
       case "approved":
+      case "inscrit":
         return "bg-green-100 text-green-700";
       case "pending":
         return "bg-yellow-100 text-yellow-700";
@@ -435,13 +436,13 @@ const ProfilePage = () => {
                                 <div>
                                   <h3 className="font-semibold text-lg">
                                     {/* Utiliser optional chaining au cas où programs serait manquant */}
-                                    {reg.programs?.nom || "Titre indisponible"}
+                                    {reg.programme?.nom || "Titre indisponible"}
                                   </h3>
                                   <p className="text-sm text-gray-600">
-                                    {reg.programs?.edition_du_Tour}
+                                    {reg.programme?.edition_du_Tour}
                                   </p>
                                   <p className="text-sm text-gray-500 mt-2">
-                                    {formatDate(reg.programs?.date_de_debut) ||
+                                    {formatDate(reg.programme?.date_de_debut) ||
                                       "Type inconnu"}
                                   </p>
                                 </div>

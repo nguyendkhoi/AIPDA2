@@ -66,7 +66,7 @@ const Navbar = () => {
                 Programmes
               </button>
               <button
-                onClick={() => {}}
+                onClick={() => redirectTo("/community")}
                 className={`flex items-center transition text-gray-700 hover:text-indigo-600`}
               >
                 <Users className="inline-block w-4 h-4 mr-1" />

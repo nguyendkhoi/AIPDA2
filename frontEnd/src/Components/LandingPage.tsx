@@ -1,9 +1,12 @@
 import { ArrowRight, Award, Calendar, Star, Users } from "lucide-react";
+import { useRedirection } from "./Hooks/useRedirection.tsx";
 
 //la condition pour cette page, c'est qu'elle apparait aussi lorsque le ! ParticipationType
 //'la page est la si et seulement si la page la currentPage = landing et que  !participationType '
 
 const LandingPage = () => {
+  const { redirectTo } = useRedirection();
+
   return (
     <div className="space-y-24">
       {/* Hero Section */}
@@ -20,14 +23,18 @@ const LandingPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {/*Au niveau du button, il faut rediriger vers la page programmes */}
             <button
-              onClick={() => {}}
+              onClick={() => {
+                redirectTo("/programs");
+              }}
               className="bg-indigo-600 text-white px-8 py-4 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center"
             >
               Participer aux sessions
               <ArrowRight className="ml-2 w-5 h-5" />
             </button>
             <button
-              onClick={() => {}}
+              onClick={() => {
+                redirectTo("/inscription?role=animateur");
+              }}
               className="border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-lg hover:bg-indigo-50 transition"
             >
               Devenir animateur
@@ -90,7 +97,9 @@ const LandingPage = () => {
             vos expériences.
           </p>
           <button
-            onClick={() => {}}
+            onClick={() => {
+              redirectTo("/inscription?role=animateur");
+            }}
             className="bg-indigo-600 text-white px-8 py-4 rounded-lg hover:bg-indigo-700 transition"
           >
             S'inscrire maintenant

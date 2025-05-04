@@ -29,7 +29,7 @@ export interface Week {
   sessions: Workshop[];
 }
 
-interface User {
+export interface User {
   id: string;
   nom: string;
   prenom?: string;

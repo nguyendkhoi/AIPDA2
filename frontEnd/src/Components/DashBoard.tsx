@@ -118,7 +118,7 @@ const DashBoard: React.FC = () => {
                       </p>
                       {/* Afficher animateurNom */}
                       <p className="text-sm text-indigo-700 font-medium">
-                        Animé par: {workshop.animateur.name}
+                        Animé par: {workshop.animateur.nom}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
                         {formatDate(workshop.date_de_debut)}
@@ -171,7 +171,7 @@ const DashBoard: React.FC = () => {
                         {workshop.nom} - {workshop.title || workshop.theme}
                       </p>
                       <p className="text-sm text-indigo-600 font-medium">
-                        Animé par: {workshop.animateur.name}
+                        Animé par: {workshop.animateur.nom}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
                         {formatDate(workshop.date_de_debut)}
