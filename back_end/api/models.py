@@ -34,6 +34,10 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
 
+class Expertise(models.Model):
+    nom = models.CharField(max_length=100, unique=True)
+    def __str__(self):
+        return self.nom
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -45,14 +49,14 @@ class User(AbstractUser):
     nom = models.CharField(max_length=100, blank=True, null=True)
     prenom = models.CharField(max_length=100, blank=True, null=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    telephone = models.CharField(max_length=20)
+    telephone = models.CharField(max_length=20, blank=True, null=True)
     pays_residence = models.CharField(max_length=100, blank=True, null=True)
     profession = models.CharField(max_length=100, blank=True, null=True)
     organisation = models.CharField(max_length=100, blank=True, null=True)
     lien_portfolio = models.URLField(blank=True, null=True)
     date_de_creation = models.DateTimeField(auto_now_add=True)
     bio = models.TextField(blank=True, null=True)
-    expertises = models.TextField(blank=True, null=True)
+    expertises = models.ManyToManyField(Expertise, related_name='users', blank=True)
     photo = models.ImageField(upload_to='photos/', blank=True, null=True)
 
     USERNAME_FIELD = 'email'

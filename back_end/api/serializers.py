@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Programme, Registration
+from .models import User, Programme, Registration, Expertise
 
 # User
 class NestedUserSerializer(serializers.ModelSerializer):
@@ -32,14 +32,33 @@ class UserSerializers(serializers.ModelSerializer):
         return data
     
     def create(self, validated_data):
+        expertises_data = validated_data.pop('expertises', [])
         validated_data.pop('password2', None)
 
         email = validated_data.pop('email')
         password = validated_data.pop('password')
         user = User.objects.create_user(email=email, password=password, **validated_data)
 
+        for expertise_nom in expertises_data:
+            expertise, created = Expertise.objects.get_or_create(nom=expertise_nom.strip())
+            user.expertises.add(expertise)
 
         return user
+    
+    def update(self, instance, validated_data):
+        expertises_data = validated_data.pop('expertises', [])
+        # Mettre à jour les autres champs de l'utilisateur
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Gérer les expertises
+        instance.expertises.clear()  # Supprimer les expertises existantes
+        for expertise_nom in expertises_data:
+            expertise, created = Expertise.objects.get_or_create(nom=expertise_nom.strip())
+            instance.expertises.add(expertise)
+
+        return instance
     
 class UserProfileSerializers(serializers.ModelSerializer):
     class Meta:
