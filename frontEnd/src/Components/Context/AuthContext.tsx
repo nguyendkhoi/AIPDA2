@@ -24,6 +24,7 @@ interface AuthContextProps {
       profession?: string;
       organisation?: string;
       lien_portfolio?: string;
+      expertises: string[];
     },
     photoFile: File | null
   ) => Promise<void>;
@@ -126,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       profession?: string;
       organisation?: string;
       lien_portfolio?: string;
+      expertises: string[];
     },
     photoFile: File | null
   ) => {
@@ -159,6 +161,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (data.organisation) formData.append("organisation", data.organisation);
       if (data.lien_portfolio)
         formData.append("lien_portfolio", data.lien_portfolio);
+
+      if (data.expertises.length > 0) {
+        data.expertises.forEach((expertise, index) => {
+          if (expertise.trim() !== "") {
+            formData.append(`expertises[${index}]`, expertise.trim());
+          }
+        });
+      }
 
       if (photoFile) {
         formData.append("photo", photoFile, photoFile.name);
@@ -222,11 +232,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     console.log("role utilisateur", user?.role);
 
-    if (user?.role !== "participant") {
-      console.error("Seuls les participants peuvent réserver un programme.");
-      alert("Seuls les participants peuvent réserver un programme.");
-      return;
-    }
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/programme/${programId}/add_participant/`,

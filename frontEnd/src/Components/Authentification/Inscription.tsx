@@ -18,6 +18,7 @@ interface FormData {
   profession: string;
   organisation: string;
   lien_portfolio: string;
+  expertises: string[];
 }
 
 type Role = "participant" | "animateur" | "";
@@ -50,9 +51,21 @@ export default function Inscription() {
     profession: "",
     organisation: "",
     lien_portfolio: "",
+    expertises: ["", "", "", "", ""],
   });
 
   const { redirectTo } = useRedirection();
+
+  const handleAddExpertise = () => {
+    setFormData({ ...formData, expertises: [...formData.expertises, ""] });
+  };
+
+  const handleRemoveExpertise = (indexToRemove: number) => {
+    const newExpertises = formData.expertises.filter(
+      (_, index) => index !== indexToRemove
+    );
+    setFormData({ ...formData, expertises: newExpertises });
+  };
 
   useEffect(() => {
     const initialRole = getInitialRoleFromURL();
@@ -77,10 +90,17 @@ export default function Inscription() {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
+    if (name.startsWith("expertise_")) {
+      const index = parseInt(name.split("_")[1]);
+      const newExpertises = [...formData.expertises];
+      newExpertises[index] = value;
+      setFormData({ ...formData, expertises: newExpertises });
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    }
     console.log("Form data", formData);
   }
 
@@ -237,6 +257,36 @@ export default function Inscription() {
                   onChange={handleChange}
                   required
                 />
+                <div className="my-4">
+                  <label className="block text-xl mb-2">Expertises :</label>
+                  {formData.expertises.map((expertise, index) => (
+                    <div key={index} className="flex items-center gap-2 mb-2">
+                      <Input
+                        type="text"
+                        placeholder={`Expertise ${index + 1}`}
+                        name={`expertise_${index}`}
+                        value={expertise}
+                        onChange={handleChange}
+                      />
+                      {formData.expertises.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExpertise(index)}
+                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddExpertise}
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Ajouter une expertise
+                  </button>
+                </div>
                 <Input
                   type="text"
                   placeholder="Organisation / Entreprise / Institution (si applicable)"

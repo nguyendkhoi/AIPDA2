@@ -48,10 +48,6 @@ export const router = createBrowserRouter([
         element: <CommunityPage />,
       },
       {
-        path: "community",
-        element: <CommunityPage />,
-      },
-      {
         path: "dashboard",
         element: <DashBoardRoute />,
       },
