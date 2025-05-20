@@ -5,16 +5,16 @@ from .models import User, Programme, Registration, Expertise
 class NestedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'prenom', 'nom', 'role', 'photo']
+        fields = ['id', 'email', 'first_name', 'name', 'role', 'photo']
         read_only_fields = fields
 
 class UserSerializers(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ['id', 'email', 'prenom', 'nom', 'role', 'telephone',
+        fields = ['id', 'email', 'first_name', 'name', 'role', 'telephone',
                    'pays_residence', 'bio','expertises', 'profession', 'photo',
-                     'organisation', 'lien_portfolio', 'date_de_creation', 'password', 'password2']
+                     'organisation', 'lien_portfolio', 'creation_date', 'password', 'password2']
         extra_kwargs = {
             'password': {'write_only': True},
             'id': {'read_only': True},
@@ -39,8 +39,8 @@ class UserSerializers(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User.objects.create_user(email=email, password=password, **validated_data)
 
-        for expertise_nom in expertises_data:
-            expertise, created = Expertise.objects.get_or_create(nom=expertise_nom.strip())
+        for expertise_name in expertises_data:
+            expertise, created = Expertise.objects.get_or_create(name=expertise_name.strip())
             user.expertises.add(expertise)
 
         return user
@@ -54,40 +54,89 @@ class UserSerializers(serializers.ModelSerializer):
 
         # Gérer les expertises
         instance.expertises.clear()  # Supprimer les expertises existantes
-        for expertise_nom in expertises_data:
-            expertise, created = Expertise.objects.get_or_create(nom=expertise_nom.strip())
+        for expertise_name in expertises_data:
+            expertise, created = Expertise.objects.get_or_create(name=expertise_name.strip())
             instance.expertises.add(expertise)
 
         return instance
     
+class UserCommunitySerializers(serializers.ModelSerializer):
+    full_name  = serializers.SerializerMethodField()
+    expertises = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        fields = ['full_name', 'role', 'photo', 'profession', 'expertises']
+
+    def get_full_name(self, obj):
+        return f"{obj.name} {obj.first_name}".strip() if obj.name or obj.first_name else obj.email
+    
+    def get_expertises(self, instance):
+        return [expertise.name for expertise in instance.expertises.all()]
+    
 class UserProfileSerializers(serializers.ModelSerializer):
+    expertises_input = serializers.ListField(
+        child=serializers.CharField(max_length=100, allow_blank=False),
+        required=False,
+        allow_empty=True,
+        write_only=True,
+        source='expertises'
+    )
+
+    expertises = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ['nom', 'bio', 'expertises']   
+        fields = ['name', 'bio', 'expertises_input', 'expertises']
+
+    def get_expertises(self, instance):
+
+        return [expertise.name for expertise in instance.expertises.all()]
+    
+    def update(self, instance, validated_data):
+        # Mettre à jour 'nom' et 'bio' normalement
+        instance.name = validated_data.get('name', instance.name)
+        instance.bio = validated_data.get('bio', instance.bio)
+
+        # Gérer le champ 'expertises' s'il est présent dans les données validées
+        if 'expertises' in validated_data:
+            expertises_names = validated_data.get('expertises') # Ceci sera une liste de chaînes
+            
+            instance.expertises.clear()  # Supprimer les anciennes relations d'expertise pour cet utilisateur
+            for expertise_name in expertises_names:
+                expertise_obj, created = Expertise.objects.get_or_create(
+                    name=expertise_name.strip()
+                )
+                print("expertise:", expertise_name)
+
+                instance.expertises.add(expertise_obj)
+        
+        instance.save()  # Sauvegarder l'instance User avec toutes les modifications
+        return instance
 
 class UserDetailSerializer(serializers.ModelSerializer):
      class Meta:
         model = User
-        fields = ['id', 'email', 'prenom', 'nom', 'role', 'telephone', 'pays_residence', 'bio','expertises', 'profession', 'organisation', 'lien_portfolio', 'date_de_creation']
+        fields = ['id', 'email', 'first_name', 'name', 
+                  'role', 'telephone', 'pays_residence', 'bio','expertises', 'profession', 'organisation', 
+                  'lien_portfolio', 'creation_date']
         read_only_fields = fields
         
 # Programme
 class ProgrammeSerializers(serializers.ModelSerializer):
     animateur = NestedUserSerializer(read_only=True)
-    participants = NestedUserSerializer(many=True, read_only=True)
     nb_participants_actuel = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Programme
-        fields = ['id', 'nom', 'animateur', 'statut', 'edition_du_Tour', 'nb_participants_actuel',
-                  'nb_participants_max', 'participants', 'temps_de_participation', 
-                  'theme', 'date_de_debut', 'description', 'date_de_creation']
+        fields = ['id', 'name', 'animateur', 'statut', 'edition_du_Tour', 'nb_participants_actuel',
+                  'nb_participants_max', 'duration_hours', 
+                  'theme', 'start_date', 'description', 'creation_date']
         extra_kwargs = {
             'id': {'read_only': True},
             'statut': {'required': False}
             }
         
-    def validate_nom(self, value):
+    def validate_name(self, value):
         if not value:
             raise serializers.ValidationError("Le nom du programme est requis.")
         if (value.lower() not in ['webinaire', 'atelier', 'talk']):
@@ -117,16 +166,16 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
     class Meta:
         model = Programme
         fields = [
-            'nom',
+            'name',
             'edition_du_Tour',
             'nb_participants_max', 
             'nb_participants_actuel',  
             'participants',          
-            'temps_de_participation',
+            'duration_hours',
             'theme',
-            'date_de_debut',
+            'start_date',
             'description',
-            'date_de_creation',
+            'creation_date',
             'statut',
         ]
 
@@ -140,7 +189,7 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
 class NestedProgramme(serializers.ModelSerializer):
     class Meta:
         model = Programme
-        fields = ['id', 'nom', 'edition_du_Tour', 'date_de_debut']
+        fields = ['id', 'name', 'edition_du_Tour', 'start_date']
         read_only_fields = fields
 
 # Registration

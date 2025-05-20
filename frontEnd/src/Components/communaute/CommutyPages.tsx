@@ -1,38 +1,32 @@
 import { ArrowRight, Star, Users } from "lucide-react";
-import { useRedirection } from "../Hooks/useRedirection.tsx";
+import { useRedirection } from "../../Hooks/useRedirection.tsx";
 import { useEffect, useState } from "react";
-import { useAuth } from "../Context/AuthContext.tsx";
+import { getUserCommunity } from "../../api/user.ts";
+import { UserCommunity } from "../../types/user.ts";
 
-// interface CommunityPageProps {
-//     onParticipationSelect?: (type: ParticipationType) => void;
-//     onOpenSignup: () => void;
-// }
-
-//la page s'affiche lorsque currentPage === community
 const CommunityPage = () => {
   const { redirectTo } = useRedirection();
-  const { API_BASE_URL } = useAuth();
 
   //Pour le moment, c'est fictif, on verra pour plus tard
   const communityMembers = [
     {
-      name: "Sophie Martin",
-      role: "UX Designer",
-      type: "Animateur",
+      full_name: "Sophie Martin",
+      profession: "UX Designer",
+      role: "Animateur",
       photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
       expertise: ["Design System", "User Research", "Prototyping"],
     },
     {
-      name: "Thomas Dubois",
-      role: "Product Designer",
-      type: "Animateur",
+      full_name: "Thomas Dubois",
+      profession: "Product Designer",
+      role: "Animateur",
       photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
       expertise: ["UI Design", "Design Thinking", "Workshop Animation"],
     },
     {
-      name: "Marie Lambert",
-      role: "Design Director",
-      type: "Animateur",
+      full_name: "Marie Lambert",
+      profession: "Design Director",
+      role: "Animateur",
       photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
       expertise: ["Design Strategy", "Team Management", "Design Leadership"],
     },
@@ -43,17 +37,20 @@ const CommunityPage = () => {
     { label: "Animateurs experts", value: "25+" },
   ];
 
-  const [allUsers, getAllUsers] = useState<any[] | null>(null);
-
-  const fetchAllUsers = async () => {
-    const userData = await fetch(`${API_BASE_URL}/api/user/`);
-    const response = await userData.json();
-    console.log("data of all user is :", response);
-  };
+  const [allUsers, settAllUsers] = useState<UserCommunity[] | null>(null);
 
   useEffect(() => {
+    const fetchAllUsers = async () => {
+      try {
+        const userData: UserCommunity[] = await getUserCommunity();
+        settAllUsers(userData);
+      } catch (err) {
+        console.error("Fetch user pour communaute: ", err);
+      }
+    };
     fetchAllUsers();
   }, []);
+
   return (
     <>
       <div className="pt-32 px-4">
@@ -126,21 +123,21 @@ const CommunityPage = () => {
             <div className="grid md:grid-cols-3 gap-8">
               {communityMembers.map((member) => (
                 <div
-                  key={member.name}
+                  key={member.full_name}
                   className="bg-gray-50 rounded-lg p-6 flex flex-col items-center text-center"
                 >
                   <img
                     src={`${member.photo}?w=150&h=150&fit=crop`}
-                    alt={member.name}
+                    alt={member.full_name}
                     className="w-24 h-24 rounded-full object-cover mb-4"
                   />
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    {member.name}
+                    {member.full_name}
                   </h3>
-                  <p className="text-indigo-600 mb-2">{member.role}</p>
+                  <p className="text-indigo-600 mb-2">{member.profession}</p>
                   <div className="flex items-center text-sm text-gray-600 mb-4">
                     <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                    {member.type}
+                    {member.role}
                   </div>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {member.expertise.map((skill) => (

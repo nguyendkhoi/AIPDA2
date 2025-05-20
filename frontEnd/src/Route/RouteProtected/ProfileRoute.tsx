@@ -1,5 +1,5 @@
-import ProfilePage from "../ProfilePage.tsx";
-import { useAuth } from "../Context/AuthContext.tsx";
+import ProfilePage from "../../Components/ProfilePage/ProfilePage.tsx";
+import { useAuth } from "../../Context/AuthContext.tsx";
 import { Navigate } from "react-router-dom";
 
 const ProfileRoute = () => {

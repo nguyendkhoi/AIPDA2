@@ -10,8 +10,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useAuth } from "./Context/AuthContext.tsx";
-import { useRedirection } from "./Hooks/useRedirection.tsx";
+import { useAuth } from "../Context/AuthContext.tsx";
+import { useRedirection } from "../Hooks/useRedirection.tsx";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);

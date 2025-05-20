@@ -1,7 +1,7 @@
 import React from "react";
-import { Workshop } from "../types.ts";
+import { Workshop } from "../types/types.ts";
 import { Calendar, CheckCircle, Clock, Users } from "lucide-react";
-import { useAuth } from "./Context/AuthContext.tsx";
+import { useAuth } from "../Context/AuthContext.tsx";
 import { mockWorkshops } from "./mockWorkshops.tsx"; // Adaptez le chemin
 
 const HEURES_PAR_SESSION_DEFAUT = 2;
@@ -13,26 +13,24 @@ const DashBoard: React.FC = () => {
   // --- Logique de calcul et de formatage (adaptée pour Workshop) ---
   const currentDate = new Date();
 
-  // Filtrer/Trier basé sur workshop.date_de_debut (string)
+  // Filtrer/Trier basé sur workshop.start_date (string)
   const upcomingWorkshops = workshops
-    .filter((workshop) => new Date(workshop.date_de_debut) > currentDate)
+    .filter((workshop) => new Date(workshop.start_date) > currentDate)
     .sort(
       (a, b) =>
-        new Date(a.date_de_debut).getTime() -
-        new Date(b.date_de_debut).getTime()
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
     );
 
   const pastWorkshops = workshops
-    .filter((workshop) => new Date(workshop.date_de_debut) <= currentDate)
+    .filter((workshop) => new Date(workshop.start_date) <= currentDate)
     .sort(
       (a, b) =>
-        new Date(b.date_de_debut).getTime() -
-        new Date(a.date_de_debut).getTime()
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
     );
 
   // Calcul des heures totales basé sur les workshops
   const totalHours = workshops.reduce((acc, workshop) => {
-    return acc + (workshop.durationHours || HEURES_PAR_SESSION_DEFAUT);
+    return acc + (workshop.duration_hours || HEURES_PAR_SESSION_DEFAUT);
   }, 0);
 
   // Fonction formatDate (inchangée, fonctionne avec string "YYYY-MM-DD")
@@ -114,14 +112,14 @@ const DashBoard: React.FC = () => {
                     <div className="mb-2 sm:mb-0 sm:mr-4">
                       {/* Afficher nom et theme (ou title si vous préférez) */}
                       <p className="font-semibold text-gray-900">
-                        {workshop.nom} - {workshop.title || workshop.theme}
+                        {workshop.name} - {workshop.title || workshop.theme}
                       </p>
                       {/* Afficher animateurNom */}
                       <p className="text-sm text-indigo-700 font-medium">
-                        Animé par: {workshop.animateur.nom}
+                        Animé par: {workshop.animateur.name}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        {formatDate(workshop.date_de_debut)}
+                        {formatDate(workshop.start_date)}
                       </p>
                       {/* Afficher statut si pertinent */}
                       <span
@@ -168,13 +166,13 @@ const DashBoard: React.FC = () => {
                     {/* Opacité réduite pour passés */}
                     <div className="mb-2 sm:mb-0 sm:mr-4">
                       <p className="font-semibold text-gray-700">
-                        {workshop.nom} - {workshop.title || workshop.theme}
+                        {workshop.name} - {workshop.title || workshop.theme}
                       </p>
                       <p className="text-sm text-indigo-600 font-medium">
-                        Animé par: {workshop.animateur.nom}
+                        Animé par: {workshop.animateur.name}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        {formatDate(workshop.date_de_debut)}
+                        {formatDate(workshop.start_date)}
                       </p>
                       {/* Afficher le nombre de participants qui étaient là */}
                       <p className="text-xs text-gray-500 mt-1">

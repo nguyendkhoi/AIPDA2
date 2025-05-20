@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export type ProgramType = "Webinaire" | "Atelier" | "Talk";
 
 export type AtelierType =
@@ -29,27 +31,19 @@ export interface Week {
   sessions: Workshop[];
 }
 
-export interface User {
-  id: string;
-  nom: string;
-  prenom?: string;
-  role: string;
-  photo?: string;
-}
-
 export interface Workshop {
-  durationHours?: number;
+  duration_hours?: number;
   id: string;
-  edition_du_Tour: string; // Correspond à `campaign_month`
-  nom: string; // Correspond à `type`
+  edition_du_Tour: string;
+  name: string; // Correspond à `type`
   theme: string; // Correspond à `subtype`
   title: string; // Ajout pour `title`
   description: string; // Ajout pour `description`
-  nb_participants_max: number; // Correspond à `max_participants`
-  nb_participants_actuel: number; // Correspond à `nb_participants_actuel`
+  nb_participants_max: number; // Correspond à `max participants`
+  nb_participants_actuel: number; // Correspond à `nombre de participants actuel`
   statut: string; // Correspond à `status`
-  createdAt: string; // Correspond à `created_at`
-  date_de_debut: string; // Correspond à `start_date`
+  creation_date: string; // Correspond à `Date de création`
+  start_date: string; // Correspond à `Date de début`
   animateur: User;
 }
 
@@ -60,7 +54,12 @@ export interface Session {
   theme: string | null;
   availableSpots: number;
   currentParticipants: number;
-  animateur: User;
+  animateur: {
+    id: string;
+    name: string;
+    photo: string | null;
+    role: string;
+  };
   description?: string;
   durationHours: string | null;
 }

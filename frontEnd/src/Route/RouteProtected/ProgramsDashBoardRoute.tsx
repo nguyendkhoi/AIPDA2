@@ -1,5 +1,5 @@
-import { useAuth } from "../Context/AuthContext.tsx";
-import ProgramsDashboard from "../ProgramsDashboard.tsx";
+import { useAuth } from "../../Context/AuthContext.tsx";
+import ProgramsDashboard from "../../Components/ProgramsDashboard/ProgramsDashboard.tsx";
 import { Navigate } from "react-router-dom";
 
 const ProgramsDashBoardRoute = () => {

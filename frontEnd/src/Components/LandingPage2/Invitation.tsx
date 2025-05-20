@@ -1,6 +1,6 @@
 import communate from "../../assets/icons/communate.svg";
 import Button from "../Button";
-import { useRedirection } from "../Hooks/useRedirection";
+import { useRedirection } from "../../Hooks/useRedirection";
 
 export default function Invitation() {
   const { redirectTo } = useRedirection();

@@ -1,5 +1,5 @@
 import { Users, ChevronRight } from "lucide-react";
-import { Session } from "../../types";
+import { Session } from "../../types/types";
 
 interface ProgramCardProps {
   session: Session;
@@ -34,11 +34,11 @@ export function ProgramCard({ session, onReserve, onView }: ProgramCardProps) {
           <div className="flex items-center space-x-2">
             <img
               src={`${session.animateur.photo}?w=40&h=40&fit=crop`}
-              alt={session.animateur.nom}
+              alt={session.animateur.name}
               className="w-8 h-8 rounded-full object-cover"
             />
             <div>
-              <p className="text-sm font-medium">{session.animateur.nom}</p>
+              <p className="text-sm font-medium">{session.animateur.name}</p>
               <p className="text-xs text-gray-500">{session.animateur.role}</p>
             </div>
           </div>

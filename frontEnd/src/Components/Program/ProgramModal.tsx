@@ -1,5 +1,5 @@
 import { X, Users, Calendar, Clock } from "lucide-react";
-import { useAuth } from "../Context/AuthContext.tsx";
+import { useAuth } from "../../Context/AuthContext.tsx";
 
 export function ProgramModal() {
   const { selectedProgramForView, setSelectedProgramForView } = useAuth();
@@ -78,12 +78,12 @@ export function ProgramModal() {
             >
               <img
                 src={`${selectedProgramForView.animateur.photo}?w=80&h=80&fit=crop`}
-                alt={selectedProgramForView.animateur.nom}
+                alt={selectedProgramForView.animateur.name}
                 className="w-16 h-16 rounded-full object-cover"
               />
               <div>
                 <p className="font-medium">
-                  {selectedProgramForView.animateur.nom}
+                  {selectedProgramForView.animateur.name}
                 </p>
                 <p className="text-sm text-gray-600">
                   {selectedProgramForView.animateur.role}

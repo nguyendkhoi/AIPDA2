@@ -1,71 +1,39 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../Context/AuthContext.tsx";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../Context/AuthContext.tsx";
 import { ProgramCard } from "./ProgramsCard.tsx";
-import { Workshop, ProgramType, Session } from "../../types.ts";
+import { Workshop, ProgramType, Session } from "../../types/types.ts";
+
+import { getAllPrograms } from "../../api/programs.ts";
 
 function getWeekNumber(d: Date): number {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  // Thursday in current week decides the year.
   date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-  // Get first day of year
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  // Calculate full weeks to nearest Thursday
   const weekNo = Math.ceil(
     ((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
   );
-  // Return week number
   return weekNo;
 }
 
 const ProgramsPage = () => {
-  const {
-    user,
-    authToken,
-    API_BASE_URL,
-    handleReservation,
-    setSelectedProgramForView,
-  } = useAuth();
+  const { user, handleReservation, setSelectedProgramForView } = useAuth();
 
-  const [apiWorkshops, setApiWorkshops] = useState<Workshop[]>([]);
+  const [programs, setPrograms] = useState<Workshop[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getWorkshopsFromApi = useCallback(async () => {
-    if (!authToken || !API_BASE_URL) {
-      setError("Erreur: Authentification ou URL API manquante.");
-      setIsLoading(false);
-      return;
-    }
-
+  const fetchPrograms = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    // setApiWorkshops([]);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/programme/`, {
-        method: "GET",
-        headers: {
-          Authorization: `Token ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      console.log("Fetching programs...");
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error("API Error Response:", errorBody);
-        throw new Error(
-          `Erreur API (${response.status}): ${
-            response.statusText || "Impossible de récupérer les programmes"
-          }`
-        );
-      }
-
-      const data = await response.json();
-      // console.log("API Response Data:", data);
-      setApiWorkshops(data || []);
+      const data = await getAllPrograms();
+      setPrograms(data || []);
     } catch (err: any) {
-      console.error("Erreur lors de la récupération des programmes:", err);
+      console.error("Error fetching programs:", err);
       setError(
         err.message ||
           "Une erreur est survenue lors du chargement des programmes."
@@ -73,74 +41,109 @@ const ProgramsPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [authToken, API_BASE_URL]);
+  }, []);
 
   useEffect(() => {
-    getWorkshopsFromApi();
-  }, [getWorkshopsFromApi]);
+    fetchPrograms();
+  }, [fetchPrograms]);
 
-  const campaigns = apiWorkshops.reduce((acc, workshop) => {
-    const month = workshop.edition_du_Tour || "Inconnu";
-    const sessionDate = new Date(workshop.date_de_debut);
-
-    if (isNaN(sessionDate.getTime())) {
-      console.warn(
-        `Invalid date format for workshop ${workshop.id}: ${workshop.date_de_debut}`
-      );
-      return acc;
+  const processedCampaigns = useMemo(() => {
+    if (!programs || programs.length === 0) {
+      return [];
     }
 
-    const weekNumber = getWeekNumber(sessionDate);
+    const groupedData = programs.reduce((acc, workshop) => {
+      const month = workshop.edition_du_Tour || "Inconnu";
+      const sessionDate = new Date(workshop.start_date);
 
-    if (!acc[month]) {
-      acc[month] = { month, weeks: [] };
-    }
+      if (isNaN(sessionDate.getTime())) {
+        console.warn(
+          `Invalid date format for workshop ${workshop.id}: ${workshop.start_date}`
+        );
+        return acc;
+      }
+      const weekNumber = getWeekNumber(sessionDate);
 
-    let week = acc[month].weeks.find((w) => w.weekNumber === weekNumber);
-    if (!week) {
-      week = { weekNumber, sessions: [] };
-      acc[month].weeks.push(week);
+      if (!acc[month]) {
+        acc[month] = { month, weeksData: {} };
+      }
 
-      acc[month].weeks.sort((a, b) => a.weekNumber - b.weekNumber);
-    }
+      if (!acc[month].weeksData[weekNumber]) {
+        acc[month].weeksData[weekNumber] = { weekNumber, sessions: [] };
+      }
 
-    const sessionData: Session = {
-      id: Number(workshop.id),
-      date: sessionDate,
-      type: workshop.nom as ProgramType,
-      theme: workshop.theme,
-      availableSpots: workshop.nb_participants_max,
-      currentParticipants: workshop.nb_participants_actuel,
-      animateur: workshop.animateur.id
+      const animateurInfo = workshop.animateur;
+      const animateurSessionData = animateurInfo?.id
         ? {
-            id: workshop.animateur.id,
-            nom:
-              `${workshop.animateur.nom || ""} ${
-                workshop.animateur.prenom || ""
+            id: animateurInfo.id,
+            name:
+              `${animateurInfo.name || ""} ${
+                animateurInfo.first_name || ""
               }`.trim() || "Animateur Inconnu",
-            photo: workshop.animateur.photo || "null",
-            role: workshop.animateur.role,
+            photo: animateurInfo.photo || null,
+            role: animateurInfo.role || "",
           }
-        : { id: "", nom: "Animateur Inconnu", role: "" },
-      description: workshop.description,
-      durationHours:
-        workshop.durationHours !== undefined
-          ? String(workshop.durationHours)
-          : null,
-    };
+        : {
+            id: "",
+            name: "Animateur Inconnu",
+            photo: null,
+            role: "",
+          };
 
-    week.sessions.push(sessionData);
-    week.sessions.sort((a, b) => a.date.getTime() - b.date.getTime());
+      const sessionData: Session = {
+        id: Number(workshop.id),
+        date: sessionDate,
+        type: workshop.name as ProgramType,
+        theme: workshop.theme,
+        availableSpots: workshop.nb_participants_max,
+        currentParticipants: workshop.nb_participants_actuel,
+        animateur: animateurSessionData,
+        description: workshop.description,
+        durationHours:
+          workshop.duration_hours !== undefined &&
+          workshop.duration_hours !== null
+            ? String(workshop.duration_hours)
+            : null,
+      };
 
-    return acc;
-  }, {} as Record<string, { month: string; weeks: { weekNumber: number; sessions: Session[] }[] }>);
+      acc[month].weeksData[weekNumber].sessions.push(sessionData);
+      return acc;
+    }, {} as Record<string, { month: string; weeksData: Record<number, { weekNumber: number; sessions: Session[] }> }>);
 
-  const campaignArray = Object.values(campaigns).sort((a, b) => {
+    const campaignArray = Object.values(groupedData).map((monthData) => {
+      const sortedWeeks = Object.values(monthData.weeksData)
+        .map((week) => ({
+          ...week,
+          sessions: week.sessions.sort(
+            (a, b) => a.date.getTime() - b.date.getTime()
+          ),
+        }))
+        .sort((a, b) => a.weekNumber - b.weekNumber);
+      return { month: monthData.month, weeks: sortedWeeks };
+    });
+
+    const monthsOrderFromData = programs
+      .map((p) => p.edition_du_Tour)
+      .filter((value, index, self) => self.indexOf(value) === index && value);
     const monthsOrder = ["Avril 2025", "Juin 2025", "Août 2025"];
-    return monthsOrder.indexOf(a.month) - monthsOrder.indexOf(b.month);
-  });
 
-  console.log("Transformed campaigns from API:", campaignArray);
+    campaignArray.sort((a, b) => {
+      const aIndex = monthsOrder.indexOf(a.month);
+      const bIndex = monthsOrder.indexOf(b.month);
+
+      if (a.month === "Inconnu") return 1;
+      if (b.month === "Inconnu") return -1;
+
+      if (aIndex === -1 && bIndex === -1) return a.month.localeCompare(b.month);
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+
+      return aIndex - bIndex;
+    });
+
+    console.log("Final processed campaigns:", campaignArray);
+    return campaignArray;
+  }, [programs]);
 
   // --- Rendu JSX ---
   if (isLoading) {
@@ -155,6 +158,8 @@ const ProgramsPage = () => {
     );
   }
 
+  const currentCampaign = processedCampaigns[selectedCampaign];
+
   return (
     <div className="pt-20 px-4 pb-10">
       <div className="max-w-7xl mx-auto">
@@ -164,17 +169,11 @@ const ProgramsPage = () => {
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
               Programmes Disponibles
             </h1>
-            {/* <button
-                            onClick={() => setSelectedCampaign(0)} 
-                            className="text-indigo-600 hover:text-indigo-700 transition text-sm font-medium"
-                        >
-                            (Voir toutes les éditions)
-                        </button> */}
           </div>
           <div className="flex space-x-3 sm:space-x-4 mb-8 overflow-x-auto pb-2">
             {" "}
-            {campaignArray.length > 0 ? (
-              campaignArray.map((campaign, index) => (
+            {processedCampaigns.length > 0 ? (
+              processedCampaigns.map((campaign, index) => (
                 <button
                   key={campaign.month}
                   onClick={() => setSelectedCampaign(index)}
@@ -194,17 +193,13 @@ const ProgramsPage = () => {
             )}
           </div>
           <div className="space-y-12">
-            {campaignArray[selectedCampaign] &&
-            campaignArray[selectedCampaign].weeks.length > 0 ? (
-              campaignArray[selectedCampaign].weeks.map((week) => (
-                <div
-                  key={`${campaignArray[selectedCampaign].month}-${week.weekNumber}`}
-                >
-                  <h3 className="text-xl font-semibold mb-6 text-gray-700 border-b pb-2">
+            {currentCampaign && currentCampaign.weeks.length > 0 ? (
+              currentCampaign.weeks.map((week) => (
+                <div key={`${currentCampaign.month}-${week.weekNumber}`}>
+                  <h3 className="text-xl font-semibold mb-6 text-gray-700 border-b border-gray-300 pb-2">
                     Semaine {week.weekNumber}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Responsive grid */}
                     {week.sessions.map((session) => (
                       <ProgramCard
                         key={session.id}
@@ -213,7 +208,7 @@ const ProgramsPage = () => {
                           if (!user) {
                             window.location.href = "/inscription";
                           } else {
-                            handleReservation(session.id, getWorkshopsFromApi);
+                            handleReservation(session.id, fetchPrograms);
                           }
                         }}
                         onView={() => setSelectedProgramForView(session)}
@@ -224,8 +219,8 @@ const ProgramsPage = () => {
               ))
             ) : (
               <p className="text-center text-gray-500 py-10 italic">
-                {campaignArray.length > 0
-                  ? `Aucun programme trouvé pour ${campaignArray[selectedCampaign]?.month}.`
+                {processedCampaigns.length > 0 && currentCampaign
+                  ? `Aucun programme trouvé pour ${currentCampaign.month}.`
                   : "Aucun programme à afficher."}
               </p>
             )}

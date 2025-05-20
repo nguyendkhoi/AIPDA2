@@ -1,5 +1,5 @@
 import Button from "../Button";
-import { useRedirection } from "../Hooks/useRedirection";
+import { useRedirection } from "../../Hooks/useRedirection";
 
 export default function Hero2() {
   const { redirectTo } = useRedirection();

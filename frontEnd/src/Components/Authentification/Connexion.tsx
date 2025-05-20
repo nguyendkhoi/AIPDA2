@@ -1,22 +1,20 @@
 import { useState, ChangeEvent, FormEvent } from "react";
-import { useAuth } from "../Context/AuthContext.tsx";
+import { useAuth } from "../../Context/AuthContext.tsx";
 import "./Inscription.css";
-import { useRedirection } from "../Hooks/useRedirection.tsx";
+import { useRedirection } from "../../Hooks/useRedirection.tsx";
 import Input from "./Input.tsx";
 import Button from "../Button.tsx";
-
-interface FormData {
-  email: string;
-  password: string;
-}
+import { AuthLoginData as FormData } from "../../types/auth.ts";
 
 export default function Connexion() {
   const { handleLogin, signupError } = useAuth();
+  const { redirectTo } = useRedirection();
+
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
   });
-  const { redirectTo } = useRedirection();
+
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({

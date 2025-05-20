@@ -1,5 +1,5 @@
 import { ArrowRight, Award, Calendar, Star, Users } from "lucide-react";
-import { useRedirection } from "./Hooks/useRedirection.tsx";
+import { useRedirection } from "../Hooks/useRedirection.tsx";
 
 //la condition pour cette page, c'est qu'elle apparait aussi lorsque le ! ParticipationType
 //'la page est la si et seulement si la page la currentPage = landing et que  !participationType '

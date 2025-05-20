@@ -1,25 +1,10 @@
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { useAuth } from "../Context/AuthContext.tsx";
+import { useAuth } from "../../Context/AuthContext.tsx";
 import "./Inscription.css";
-import { useRedirection } from "../Hooks/useRedirection.tsx";
-
+import { useRedirection } from "../../Hooks/useRedirection.tsx";
+import type { AuthSignupData as FormData } from "../../types/auth.ts";
 import Input from "./Input.tsx";
 import Button from "../Button.tsx";
-
-interface FormData {
-  prenom: string;
-  nom: string;
-  role: string;
-  email: string;
-  telephone: string;
-  password: string;
-  password2: string;
-  pays_residence: string;
-  profession: string;
-  organisation: string;
-  lien_portfolio: string;
-  expertises: string[];
-}
 
 type Role = "participant" | "animateur" | "";
 
@@ -38,15 +23,16 @@ export default function Inscription() {
   const { handleSignup, signupError, user } = useAuth();
 
   const [selectedRole, setSelectedRole] = useState<Role>("");
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  // photoFile is now integrated into formData
   const [formData, setFormData] = useState<FormData>({
-    prenom: "",
-    nom: "",
+    first_name: "",
+    name: "",
     role: "",
     email: "",
     telephone: "",
     password: "",
     password2: "",
+    photo: null, // Initialize photo to null
     pays_residence: "",
     profession: "",
     organisation: "",
@@ -57,11 +43,14 @@ export default function Inscription() {
   const { redirectTo } = useRedirection();
 
   const handleAddExpertise = () => {
-    setFormData({ ...formData, expertises: [...formData.expertises, ""] });
+    setFormData({
+      ...formData,
+      expertises: [...(formData.expertises ?? []), ""],
+    });
   };
 
   const handleRemoveExpertise = (indexToRemove: number) => {
-    const newExpertises = formData.expertises.filter(
+    const newExpertises = (formData.expertises ?? []).filter(
       (_, index) => index !== indexToRemove
     );
     setFormData({ ...formData, expertises: newExpertises });
@@ -92,7 +81,7 @@ export default function Inscription() {
     const { name, value } = e.target;
     if (name.startsWith("expertise_")) {
       const index = parseInt(name.split("_")[1]);
-      const newExpertises = [...formData.expertises];
+      const newExpertises = [...(formData.expertises ?? [])];
       newExpertises[index] = value;
       setFormData({ ...formData, expertises: newExpertises });
     } else {
@@ -104,18 +93,24 @@ export default function Inscription() {
     console.log("Form data", formData);
   }
 
+  // Modified to update formData.photo
   function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) {
-      setPhotoFile(e.target.files[0]);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        photo: e.target.files![0], // Use non-null assertion as we've checked for existence
+      }));
     } else {
-      setPhotoFile(null);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        photo: null,
+      }));
     }
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    handleSignup(formData, photoFile);
+    handleSignup(formData);
   };
 
   return (
@@ -141,16 +136,16 @@ export default function Inscription() {
               <Input
                 type="text"
                 placeholder="Prénom"
-                name="prenom"
-                value={formData.prenom}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
                 required
               />
               <Input
                 type="text"
                 placeholder="Nom"
-                name="nom"
-                value={formData.nom}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 required
               />
@@ -166,9 +161,9 @@ export default function Inscription() {
                 accept="image/*"
                 onChange={handlePhotoChange}
               />
-              {photoFile && (
+              {formData.photo && ( // Check formData.photo directly
                 <img
-                  src={URL.createObjectURL(photoFile)}
+                  src={URL.createObjectURL(formData.photo)}
                   alt="Aperçu"
                   className="mt-2 h-20 w-20 object-cover rounded"
                 />
@@ -259,7 +254,7 @@ export default function Inscription() {
                 />
                 <div className="my-4">
                   <label className="block text-xl mb-2">Expertises :</label>
-                  {formData.expertises.map((expertise, index) => (
+                  {(formData.expertises ?? []).map((expertise, index) => (
                     <div key={index} className="flex items-center gap-2 mb-2">
                       <Input
                         type="text"
@@ -268,7 +263,7 @@ export default function Inscription() {
                         value={expertise}
                         onChange={handleChange}
                       />
-                      {formData.expertises.length > 1 && (
+                      {(formData.expertises ?? []).length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveExpertise(index)}

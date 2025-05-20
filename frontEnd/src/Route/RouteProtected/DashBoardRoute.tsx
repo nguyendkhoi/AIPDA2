@@ -1,5 +1,5 @@
-import DashBoard from "../DashBoard.tsx";
-import { useAuth } from "../Context/AuthContext.tsx";
+import DashBoard from "../../Components/DashBoard.tsx";
+import { useAuth } from "../../Context/AuthContext.tsx";
 import { Navigate } from "react-router-dom";
 
 const DashBoardRoute = () => {
