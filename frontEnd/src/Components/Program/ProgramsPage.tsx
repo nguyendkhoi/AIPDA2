@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../Context/AuthContext.tsx";
 import { ProgramCard } from "./ProgramsCard.tsx";
 import { Workshop, ProgramType, Session } from "../../types/types.ts";
@@ -122,9 +122,6 @@ const ProgramsPage = () => {
       return { month: monthData.month, weeks: sortedWeeks };
     });
 
-    const monthsOrderFromData = programs
-      .map((p) => p.edition_du_Tour)
-      .filter((value, index, self) => self.indexOf(value) === index && value);
     const monthsOrder = ["Avril 2025", "Juin 2025", "Août 2025"];
 
     campaignArray.sort((a, b) => {

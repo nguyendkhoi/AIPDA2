@@ -8,29 +8,6 @@ const CommunityPage = () => {
   const { redirectTo } = useRedirection();
 
   //Pour le moment, c'est fictif, on verra pour plus tard
-  const communityMembers = [
-    {
-      full_name: "Sophie Martin",
-      profession: "UX Designer",
-      role: "Animateur",
-      photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-      expertise: ["Design System", "User Research", "Prototyping"],
-    },
-    {
-      full_name: "Thomas Dubois",
-      profession: "Product Designer",
-      role: "Animateur",
-      photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-      expertise: ["UI Design", "Design Thinking", "Workshop Animation"],
-    },
-    {
-      full_name: "Marie Lambert",
-      profession: "Design Director",
-      role: "Animateur",
-      photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-      expertise: ["Design Strategy", "Team Management", "Design Leadership"],
-    },
-  ];
   const stats = [
     { label: "Membres actifs", value: "500+" },
     { label: "Sessions réalisées", value: "150+" },
@@ -121,7 +98,7 @@ const CommunityPage = () => {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {communityMembers.map((member) => (
+              {allUsers?.map((member) => (
                 <div
                   key={member.full_name}
                   className="bg-gray-50 rounded-lg p-6 flex flex-col items-center text-center"
@@ -140,7 +117,7 @@ const CommunityPage = () => {
                     {member.role}
                   </div>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {member.expertise.map((skill) => (
+                    {member.expertises.map((skill) => (
                       <span
                         key={skill}
                         className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm"

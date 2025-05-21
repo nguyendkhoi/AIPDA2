@@ -1,5 +1,9 @@
 import api from "./index";
-import { AuthLoginData, AuthSignupData, UserDataResponse } from "../types/auth";
+import {
+  AuthLoginData,
+  AuthSignupResponse,
+  UserDataResponse,
+} from "../types/auth";
 
 // Login function
 export const loginUser = async (
@@ -12,12 +16,16 @@ export const loginUser = async (
 // signup function
 export const signupUser = async (
   formData: FormData
-): Promise<UserDataResponse> => {
-  const response = await api.post<UserDataResponse>("/inscription/", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+): Promise<AuthSignupResponse> => {
+  const response = await api.post<AuthSignupResponse>(
+    "/inscription/",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return response.data;
 };
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Edition, Workshop } from "../../types/types.ts";
 import { WorkshopFormData } from "../../types/programs.ts";
 import { Calendar, Edit2, PlusCircle, Trash2, Users } from "lucide-react";
-import { hookProgramsDashboard } from "./HookProgramsDashboard.tsx";
+import { hookProgramsDashboard } from "./hookProgramsDashboard.tsx";
 
 // --- Constants ---
 const EDITIONS: Edition[] = ["Avril 2025", "Juin 2025", "Août 2025"];

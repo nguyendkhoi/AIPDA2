@@ -3,6 +3,10 @@ export interface AuthLoginData {
   password: string;
 }
 
+export interface AuthSignupResponse {
+  status: string;
+}
+
 export interface AuthSignupData {
   name: string;
   first_name: string;

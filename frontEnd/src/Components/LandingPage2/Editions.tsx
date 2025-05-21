@@ -1,6 +1,3 @@
-import flecheG from "../../assets/icons/fleche-g.svg";
-import fleche from "../../assets/icons/fleche-d.svg";
-
 export default function Editions() {
   return (
     <section id="previous-editions" className="py-12">

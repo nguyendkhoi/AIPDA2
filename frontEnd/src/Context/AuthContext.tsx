@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Workshop, Session } from "../types/types";
 
 import { AuthLoginData, AuthSignupData } from "../types/auth";
-import { ReservationResponse } from "../types/programs";
 
 import { loginUser, signupUser, logoutUser } from "../api/auth";
 import { addParticipantToProgram } from "../api/programs";

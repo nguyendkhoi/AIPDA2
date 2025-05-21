@@ -1,5 +1,4 @@
 import React from "react";
-import { Workshop } from "../types/types.ts";
 import { Calendar, CheckCircle, Clock, Users } from "lucide-react";
 import { useAuth } from "../Context/AuthContext.tsx";
 import { mockWorkshops } from "./mockWorkshops.tsx"; // Adaptez le chemin
