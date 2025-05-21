@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url 
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,12 +25,27 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-pn5q5445zueh5cbzp!k@ppfpn)^%d6thnef-v1c4p-k!1ux7e1'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-pn5q5445zueh5cbzp!k@ppfpn)^%d6thnef-v1c4p-k!1ux7e1') # Giữ key mặc định cho local nếu không có biến môi trường
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+if DEBUG:
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
+
+if not DEBUG and not ALLOWED_HOSTS:
+    if not os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
+        print("ALERT: ALLOWED_HOSTS is empty. This is not recommended for production.")
+        if DEBUG:
+             ALLOWED_HOSTS.append('*')
+
+SQLITE_DEFAULT_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 
 
 # Application definition
@@ -49,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -111,10 +128,10 @@ CORS_ALLOWED_HEADERS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', SQLITE_DEFAULT_URL),
+        conn_max_age=600,
+    )
 }
 
 AUTH_USER_MODEL = 'api.User'
@@ -168,8 +185,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
+# This production code might break development mode, so we check whether we're in DEBUG mode
+if not DEBUG:
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
