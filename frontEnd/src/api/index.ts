@@ -1,8 +1,7 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 
-const API_BASE_URL = "aipda-web.onrender.com/api";
+const API_BASE_URL = "https://aipda-web.onrender.com/api";
 
-// 1. Tạo một instance Axios chung
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
