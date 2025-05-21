@@ -51,7 +51,7 @@ SQLITE_DEFAULT_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 # Application definition
 
 INSTALLED_APPS = [
-    'api',
+    'back_end.api.apps.ApiConfig',
     'rest_framework',
     'corsheaders',
     'django.contrib.admin',
@@ -75,7 +75,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'back_end.urls'
+ROOT_URLCONF = 'back_end.back_end.urls'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -97,7 +97,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'back_end.wsgi.application'
+WSGI_APPLICATION = 'back_end.back_end.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
