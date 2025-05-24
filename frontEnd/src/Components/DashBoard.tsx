@@ -108,12 +108,12 @@ const DashBoard: React.FC = () => {
                       {/* Afficher statut si pertinent */}
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
-                          workshop.statut === "confirme"
+                          workshop.status === "confirme"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {workshop.statut}
+                        {workshop.status}
                       </span>
                     </div>
                     <div className="flex items-center flex-shrink-0">

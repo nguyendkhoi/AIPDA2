@@ -36,10 +36,9 @@ const ProfilePage = () => {
         setUserProfile(null);
         return;
       }
-
+      setIsSaving(true);
       try {
         const profileData = await getUserProfile();
-
         setUserProfile({
           name: profileData.name || user.name,
           first_name: profileData.first_name || user.first_name,
@@ -66,6 +65,8 @@ const ProfilePage = () => {
         setAuthToken(null);
         localStorage.removeItem("userData");
         localStorage.removeItem("authToken");
+      } finally {
+        setIsSaving(false);
       }
     };
 
