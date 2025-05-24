@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../Context/AuthContext";
 
 import ProfileLoading from "./ProfileLoading";
@@ -32,6 +32,8 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      console.log("Fetch profile");
+      console.log("User: ", user);
       if (!user) {
         setUserProfile(null);
         return;
@@ -46,13 +48,19 @@ const ProfilePage = () => {
           expertises: profileData.expertises || [],
         });
 
-        const updatedUser = {
-          ...user,
-          name: profileData.name || user.name,
-          first_name: profileData.first_name || user.first_name,
-        };
-        localStorage.setItem("userData", JSON.stringify(updatedUser));
-        setUser(updatedUser);
+        const nameChanged = profileData.name && profileData.name !== user.name;
+        const firstNameChanged =
+          profileData.first_name && profileData.first_name !== user.first_name;
+
+        if (nameChanged || firstNameChanged) {
+          const updatedUser = {
+            ...user,
+            name: profileData.name || user.name,
+            first_name: profileData.first_name || user.first_name,
+          };
+          localStorage.setItem("userData", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        }
       } catch (err: any) {
         console.error("Failed to fetch user profile:", err);
         setAlertInfo({
@@ -132,43 +140,52 @@ const ProfilePage = () => {
     };
 
     fetchUserProgrammes();
-  }, [user, setProposals, setRegistrations]); // Depend on user context
+  }, [user]);
 
   // Generic handler for updating userProfile fields
-  const handleUserProfileChange = (
-    field: keyof UserProfileApiResponse,
-    value: string | string[] | undefined
-  ) => {
-    setUserProfile((prevProfile) => ({
-      ...prevProfile!,
-      [field]: value,
-    }));
-  };
+  const handleUserProfileChange = useCallback(
+    (
+      field: keyof UserProfileApiResponse,
+      value: string | string[] | undefined
+    ) => {
+      setUserProfile((prevProfile) => ({
+        ...prevProfile!,
+        [field]: value,
+      }));
+    },
+    []
+  );
 
-  // Specific handler for expertise array changes
-  const handleExpertiseChange = (index: number, value: string) => {
-    if (!userProfile?.expertises) return; // Ensure expertises array exists
-    const newExpertises = userProfile.expertises.map((ex, i) =>
-      i === index ? value : ex
-    );
-    handleUserProfileChange("expertises", newExpertises);
-  };
+  const handleExpertiseChange = useCallback((index: number, value: string) => {
+    setUserProfile((prevProfile) => {
+      if (!prevProfile?.expertises) return prevProfile;
+      const newExpertises = prevProfile.expertises.map((ex, i) =>
+        i === index ? value : ex
+      );
+      return { ...prevProfile, expertises: newExpertises };
+    });
+  }, []);
 
-  const handleAddExpertiseField = () => {
-    if (!userProfile?.expertises) {
-      handleUserProfileChange("expertises", [""]); // Initialize if null
-      return;
-    }
-    handleUserProfileChange("expertises", [...userProfile.expertises, ""]);
-  };
+  const handleAddExpertiseField = useCallback(() => {
+    setUserProfile((prevProfile) => {
+      if (!prevProfile?.expertises) {
+        return { ...prevProfile!, expertises: [""] };
+      }
+      return { ...prevProfile, expertises: [...prevProfile.expertises, ""] };
+    });
+  }, []);
 
-  const handleRemoveExpertiseField = (indexToRemove: number) => {
-    if (!userProfile?.expertises) return;
-    handleUserProfileChange(
-      "expertises",
-      userProfile.expertises.filter((_, index) => index !== indexToRemove)
-    );
-  };
+  const handleRemoveExpertiseField = useCallback((indexToRemove: number) => {
+    setUserProfile((prevProfile) => {
+      if (!prevProfile?.expertises) return prevProfile;
+      return {
+        ...prevProfile,
+        expertises: prevProfile.expertises.filter(
+          (_, idx) => idx !== indexToRemove
+        ),
+      };
+    });
+  }, []);
 
   // Toggle edit mode and initialize userProfile for editing
   const handleToggleEdit = () => {
