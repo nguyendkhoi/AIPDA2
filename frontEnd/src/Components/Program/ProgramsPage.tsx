@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../Context/AuthContext.tsx";
 import { ProgramCard } from "./ProgramsCard.tsx";
-import { Workshop, ProgramType, Session } from "../../types/types.ts";
+import { Workshop, ProgramType, Session } from "../../types/programs.ts";
 
 import { getAllPrograms } from "../../api/programs.ts";
 
@@ -80,13 +80,13 @@ const ProgramsPage = () => {
               `${animateurInfo.name || ""} ${
                 animateurInfo.first_name || ""
               }`.trim() || "Animateur Inconnu",
-            photo: animateurInfo.photo || null,
+            photo: animateurInfo.photo || undefined,
             role: animateurInfo.role || "",
           }
         : {
             id: "",
             name: "Animateur Inconnu",
-            photo: null,
+            photo: undefined,
             role: "",
           };
 
@@ -96,10 +96,10 @@ const ProgramsPage = () => {
         type: workshop.name as ProgramType,
         theme: workshop.theme,
         availableSpots: workshop.nb_participants_max,
-        currentParticipants: workshop.nb_participants_actuel,
+        current_participant_count: workshop.current_participant_count,
         animateur: animateurSessionData,
         description: workshop.description,
-        durationHours:
+        duration_hours:
           workshop.duration_hours !== undefined &&
           workshop.duration_hours !== null
             ? String(workshop.duration_hours)

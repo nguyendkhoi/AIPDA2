@@ -50,7 +50,7 @@ export function ProgramModal() {
           <div className="flex items-center">
             <Users className="h-5 w-5 text-gray-400 mr-2" />
             <div className="text-sm">
-              {selectedProgramForView.currentParticipants} /{" "}
+              {selectedProgramForView.current_participant_count} /{" "}
               {selectedProgramForView.availableSpots} participants
             </div>
           </div>

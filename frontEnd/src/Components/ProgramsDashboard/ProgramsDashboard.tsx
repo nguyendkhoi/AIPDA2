@@ -1,6 +1,5 @@
 import React from "react";
-import { Edition, Workshop } from "../../types/types.ts";
-import { WorkshopFormData } from "../../types/programs.ts";
+import { WorkshopFormData, Edition, Workshop } from "../../types/programs.ts";
 import { Calendar, Edit2, PlusCircle, Trash2, Users } from "lucide-react";
 import { hookProgramsDashboard } from "./hookProgramsDashboard.tsx";
 
@@ -147,7 +146,7 @@ const ProgramsDashboard: React.FC = () => {
                         <div className="flex items-center">
                           <Users className="w-5 h-5 text-gray-400 mr-1" />
                           <span>
-                            {workshop.nb_participants_actuel ?? "-"} /{" "}
+                            {workshop.current_participant_count ?? "-"} /{" "}
                             {workshop.nb_participants_max ?? "-"}
                           </span>
                         </div>

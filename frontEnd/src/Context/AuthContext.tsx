@@ -1,36 +1,21 @@
 import { useState, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Workshop, Session } from "../types/types";
 
+import { Workshop, Session } from "../types/programs";
 import { AuthLoginData, AuthSignupData } from "../types/auth";
+import { AlertInfo } from "../types/common";
+import { User, UserProfileApiResponse } from "../types/user";
 
 import { loginUser, signupUser, logoutUser } from "../api/auth";
 import { addParticipantToProgram } from "../api/programs";
-import { getUserProfile, updateUserProfile } from "../api/user";
 
 interface AuthContextProps {
   isSaving: boolean;
   setIsSaving: (isSaving: boolean) => void;
   signupError: string | null;
   setSignupError: (error: string | null) => void;
-  user: {
-    id: string | number;
-    name: string;
-    email: string;
-    role: string;
-    bio: string;
-    expertises?: string[];
-  } | null;
-  setUser: (
-    user: {
-      id: string | number;
-      name: string;
-      email: string;
-      role: string;
-      bio: string;
-      expertises?: string[];
-    } | null
-  ) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
   handleSignup: (data: AuthSignupData) => Promise<void>;
   handleLogin: (data: AuthLoginData) => Promise<void>;
   handleLogout: () => Promise<void>;
@@ -41,12 +26,8 @@ interface AuthContextProps {
   handleReservation: (programId: number, onSucces: () => void) => Promise<void>;
   setSelectedProgramForView: (session: Session | null) => void;
   selectedProgramForView: Session | null;
-  HandleFetchUserProfile: () => Promise<void>;
-  handleUpdateUserProfile: (data: {
-    name?: string;
-    bio?: string;
-    expertises_input?: string[];
-  }) => Promise<boolean | void>;
+  alertInfo: AlertInfo | null;
+  setAlertInfo: (alert: AlertInfo | null) => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -63,83 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [selectedProgramForView, setSelectedProgramForView] =
     useState<Session | null>(null);
-  const [user, setUser] = useState<{
-    id: string | number;
-    name: string;
-    email: string;
-    role: string;
-    bio: string;
-    expertises?: string[];
-  } | null>(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("userData");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  const [alertInfo, setAlertInfo] = useState<AlertInfo | null>(null);
   const navigate = useNavigate();
-
-  // ---Update user profile---
-  const handleUpdateUserProfile = async (data: {
-    name?: string;
-    bio?: string;
-    expertises_input?: string[];
-  }) => {
-    if (!authToken)
-      console.error("User not authenticated or ID missing for profile update.");
-
-    try {
-      setIsSaving(true);
-      const updatedProfileResponse = await updateUserProfile(data);
-
-      setUser((prevUser) => {
-        if (!prevUser) return null;
-        const updatedProfileUser = {
-          ...prevUser,
-          name: updatedProfileResponse.name || prevUser.name,
-          bio: updatedProfileResponse.bio || prevUser.bio,
-          expertises: updatedProfileResponse.expertises || prevUser.expertises,
-        };
-        localStorage.setItem("userData", JSON.stringify(updatedProfileUser));
-        return updatedProfileUser;
-      });
-      return true;
-    } catch (err: any) {
-      console.error("Error: ", err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // ---Fetch user profile---
-  const HandleFetchUserProfile = async (): Promise<void> => {
-    if (!authToken) {
-      console.warn("No auth token found, cannot fetch user profile.");
-      setUser(null);
-      throw new Error("No auth token found");
-    }
-
-    try {
-      const profileData = await getUserProfile();
-      console.log("User profile fetched:", profileData);
-
-      setUser((prevUser) => {
-        if (!prevUser) return null;
-        const updatedUser = {
-          ...prevUser,
-          name: profileData.name || prevUser.name,
-          bio: profileData.bio || "",
-          expertises: profileData.expertises || [],
-        };
-        localStorage.setItem("userData", JSON.stringify(updatedUser));
-        return updatedUser;
-      });
-    } catch (err: any) {
-      setUser(null);
-      setAuthToken(null);
-      localStorage.removeItem("userData");
-      localStorage.removeItem("authToken");
-      throw err;
-    }
-  };
 
   // ---Login user---
   const handleLogin = async (data: AuthLoginData) => {
@@ -156,8 +67,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         bio: loginData.user.bio || "",
       };
 
-      console.log("Login data:", loginData);
-
       localStorage.setItem("userData", JSON.stringify(userData));
       localStorage.setItem("authToken", loginData.token);
 
@@ -166,13 +75,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       navigate("/");
       setSignupError(null);
+      setAlertInfo({ message: "Login réussi!", type: "success" });
     } catch (error: any) {
       console.error("Error during login:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        setSignupError(error.response.data.detail);
-      } else {
-        setSignupError("Une erreur est survenue lors de la connexion");
+      let errorMessage = "Une erreur s'est produite lors de la connexion.";
+      if (error.response.data.detail) {
+        errorMessage = error.response.data.detail;
       }
+      setSignupError(errorMessage);
+      setAlertInfo({ message: errorMessage, type: "error" });
     }
   };
 
@@ -184,11 +95,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setSignupError(
           "La confirmation du mot de passe ne correspond pas au mot de passe"
         );
+        setAlertInfo({
+          message:
+            "La confirmation du mot de passe ne correspond pas au mot de passe",
+          type: "error",
+        });
         return;
       }
 
       if (!data.role) {
         setSignupError("Veuillez sélectionner un rôle !");
+        setAlertInfo({
+          message: "Veuillez sélectionner un rôle !",
+          type: "info",
+        });
         return;
       }
 
@@ -221,7 +141,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         });
       }
-      console.log("Form data to send:", formDataToSend);
       const signupResponseData = await signupUser(formDataToSend);
 
       if (signupResponseData) {
@@ -230,20 +149,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error: any) {
       console.error("Error during signup:", error);
-      if (error.response && error.response.data) {
-        const backendErrors = error.response.data;
-        let errorMessage = "Une erreur est survenue lors de l'inscription.";
-        if (backendErrors.email) {
-          errorMessage = `Email: ${backendErrors.email.join(", ")}`;
-        } else if (backendErrors.password) {
-          errorMessage = `Mot de passe: ${backendErrors.password.join(", ")}`;
-        }
-        setSignupError(errorMessage);
-      } else {
-        setSignupError(
-          error.message || "Une erreur est survenue lors de l'inscription"
-        );
-      }
+      let errorMessage = error.response.data.detail
+        ? error.response.data.detail
+        : "Une erreur est survenue lors de l'inscription";
+      setSignupError(errorMessage);
+      setAlertInfo({ message: errorMessage, type: "error" });
     }
   };
 
@@ -264,10 +174,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     onSucces?: () => void
   ) => {
     if (!authToken) {
-      console.error(
-        "L'utilisateur n'est pas authentifié. Impossible de réserver un programme."
-      );
-      setSignupError("Vous devez être connecté pour réserver.");
+      setAlertInfo({
+        message: "Vous devez être connecté pour réserver.",
+        type: "error",
+      });
       return;
     }
 
@@ -275,17 +185,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await addParticipantToProgram(programId);
 
       onSucces && onSucces();
-      console.log("Réservation réussie !");
-      alert("Reservation reussi");
+      setAlertInfo({ message: "Réservation réussie !", type: "success" });
     } catch (error: any) {
-      console.error("Error during reservation:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        setSignupError(error.response.data.detail);
-      } else if (error.message) {
-        setSignupError(error.message);
-      } else {
-        setSignupError("Une erreur est survenue lors de la réservation.");
-      }
+      let messageError = error.response.data.detail
+        ? error.response.data.detail
+        : "Error during reservation:";
+      setAlertInfo({ message: messageError, type: "error" });
     }
   };
 
@@ -306,10 +211,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         handleReservation,
         setSelectedProgramForView,
         selectedProgramForView,
-        HandleFetchUserProfile,
-        handleUpdateUserProfile,
         isSaving,
         setIsSaving,
+        setAlertInfo,
+        alertInfo,
       }}
     >
       {children}

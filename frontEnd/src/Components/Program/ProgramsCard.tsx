@@ -1,5 +1,6 @@
 import { Users, ChevronRight } from "lucide-react";
-import { Session } from "../../types/types";
+import { Session } from "../../types/programs";
+import { formatDate } from "../../utils/D_formatters";
 
 interface ProgramCardProps {
   session: Session;
@@ -11,11 +12,7 @@ export function ProgramCard({ session, onReserve, onView }: ProgramCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
       <div className="text-sm text-gray-600 mb-2">
-        {new Date(session.date).toLocaleDateString("fr-FR", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
+        {formatDate(session.date)}
       </div>
 
       <h3 className="text-xl font-semibold text-gray-900 mb-1">
@@ -49,7 +46,8 @@ export function ProgramCard({ session, onReserve, onView }: ProgramCardProps) {
       <div className="flex items-center text-sm text-gray-600 mb-4">
         <Users className="h-4 w-4 mr-1" />
         <span>
-          {session.currentParticipants} / {session.availableSpots} participants
+          {session.current_participant_count} / {session.availableSpots}{" "}
+          participants
         </span>
       </div>
 
@@ -57,7 +55,7 @@ export function ProgramCard({ session, onReserve, onView }: ProgramCardProps) {
       <div className="flex gap-2 mt-4">
         <button
           onClick={() => onReserve()}
-          disabled={session.currentParticipants >= session.availableSpots}
+          disabled={session.current_participant_count >= session.availableSpots}
           className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
         >
           Réserver

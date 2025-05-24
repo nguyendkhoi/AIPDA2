@@ -1,16 +1,13 @@
 import api from "./index";
-import { Workshop } from "../types/types";
 import {
   WorkshopFormData,
-  AnimateurProgrammeAPIResponse,
+  Workshop,
   ReservationResponse,
 } from "../types/programs";
 
-export const getParticipantProgrammes = async (): Promise<
-  AnimateurProgrammeAPIResponse[]
-> => {
+export const getParticipantProgrammes = async (): Promise<Workshop[]> => {
   try {
-    const response = await api.get<AnimateurProgrammeAPIResponse[]>(
+    const response = await api.get<Workshop[]>(
       "/programme/participant_programmes/"
     );
     return response.data;
@@ -21,11 +18,9 @@ export const getParticipantProgrammes = async (): Promise<
 };
 
 // Fetch programs for a specific animateur
-export const getAnimateurProgrammes = async (): Promise<
-  AnimateurProgrammeAPIResponse[]
-> => {
+export const getAnimateurProgrammes = async (): Promise<Workshop[]> => {
   try {
-    const response = await api.get<AnimateurProgrammeAPIResponse[]>(
+    const response = await api.get<Workshop[]>(
       "/programme/animateur_programmes/"
     );
     return response.data;

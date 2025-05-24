@@ -1,7 +1,8 @@
 import React from "react";
 import { Calendar, CheckCircle, Clock, Users } from "lucide-react";
 import { useAuth } from "../Context/AuthContext.tsx";
-import { mockWorkshops } from "./mockWorkshops.tsx"; // Adaptez le chemin
+import { mockWorkshops } from "./mockWorkshops.tsx";
+import { formatDate } from "../utils/D_formatters.tsx";
 
 const HEURES_PAR_SESSION_DEFAUT = 2;
 
@@ -31,22 +32,6 @@ const DashBoard: React.FC = () => {
   const totalHours = workshops.reduce((acc, workshop) => {
     return acc + (workshop.duration_hours || HEURES_PAR_SESSION_DEFAUT);
   }, 0);
-
-  // Fonction formatDate (inchangée, fonctionne avec string "YYYY-MM-DD")
-  const formatDate = (dateInput: Date | string): string => {
-    const date =
-      typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-    // Vérification supplémentaire si la date est valide
-    if (isNaN(date.getTime())) {
-      return "Date invalide";
-    }
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
 
   // --- Rendu JSX (adapté pour Workshop) ---
   return (
@@ -118,7 +103,7 @@ const DashBoard: React.FC = () => {
                         Animé par: {workshop.animateur.name}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        {formatDate(workshop.start_date)}
+                        {formatDate(new Date(workshop.start_date))}
                       </p>
                       {/* Afficher statut si pertinent */}
                       <span
@@ -135,7 +120,7 @@ const DashBoard: React.FC = () => {
                       <Users className="h-5 w-5 text-gray-400 mr-2" />
                       {/* Afficher participants actuel / max */}
                       <span className="text-sm text-gray-600">
-                        {workshop.nb_participants_actuel ?? "N/A"} /{" "}
+                        {workshop.current_participant_count ?? "N/A"} /{" "}
                         {workshop.nb_participants_max ?? "N/A"}
                       </span>
                     </div>
@@ -161,7 +146,6 @@ const DashBoard: React.FC = () => {
                     key={workshop.id}
                     className="bg-gray-50 opacity-80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between"
                   >
-                    {" "}
                     {/* Opacité réduite pour passés */}
                     <div className="mb-2 sm:mb-0 sm:mr-4">
                       <p className="font-semibold text-gray-700">
@@ -171,11 +155,12 @@ const DashBoard: React.FC = () => {
                         Animé par: {workshop.animateur.name}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        {formatDate(workshop.start_date)}
+                        {formatDate(new Date(workshop.start_date))}
                       </p>
                       {/* Afficher le nombre de participants qui étaient là */}
                       <p className="text-xs text-gray-500 mt-1">
-                        ({workshop.nb_participants_actuel ?? "?"} participants)
+                        ({workshop.current_participant_count ?? "?"}{" "}
+                        participants)
                       </p>
                     </div>
                     <div className="flex items-center text-green-500 flex-shrink-0">

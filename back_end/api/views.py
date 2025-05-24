@@ -18,14 +18,25 @@ class UserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializers
     permission_classes = [AllowAny]
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            
+            error_messages = []
+            for field_key, messages_list in serializer.errors.items():
+                for message in messages_list:
+                    error_messages.append(str(message))
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            final_error_message = error_messages[0] if error_messages else "Une erreur de validation est survenue."
+            
+            return Response({
+                "detail": final_error_message 
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response({"status": "Succes"}, status=status.HTTP_201_CREATED)
 
 class LoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
@@ -98,7 +109,7 @@ class ProgrammeView(viewsets.ModelViewSet):
         if programme.current_participant_count >= programme.nb_participants_max:
              return Response({'status': 'Le programme est complet'}, status=status.HTTP_400_BAD_REQUEST)
         
-        if Registration.filter(participant=user, programme=programme, statut="inscrit"):
+        if Registration.objects.filter(participant=user, programme=programme, statut="inscrit"):
                         return Response({'status': 'Utilisateur déjà inscrit'}, status=status.HTTP_400_BAD_REQUEST)
 
         Registration.objects.get_or_create(participant=user, programme=programme, defaults={'statut': 'inscrit'})

@@ -74,11 +74,11 @@ class Programme(models.Model):
         ('talk', 'Talk')
     ]
     STATUT_CHOICES = [
-        ('en_attente', 'En attente'),
-        ('confirme', 'Confirmé'),
-        ('termine', 'Terminé'),
-        ('en_cours', 'En cours'),
-        ('annule', 'Annulé'),
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('terminated', 'Terminated'),
+        ('in_progress', 'In progress'),
+        ('cancelled', 'Cancelled'),
     ]
     name = models.CharField(max_length=100, blank=True, null=True, choices=NOM_CHOICES)
     theme = models.CharField(max_length=100, blank=True, null=True)
@@ -100,15 +100,15 @@ class Programme(models.Model):
 
 class Registration(models.Model):
     STATUT_CHOICES = [
-        ('inscrit', 'Inscrit'),
-        ('en_cours', 'En cours'),
-        ('annule', 'Annulé'),
-        ('success', 'Succès'),
+        ('registered', 'Registered'),
+        ('in_progress', 'In progress'),
+        ('cancelled', 'Cancelled'),
+        ('success', 'Success'),
     ]
     participant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registrations_as_participant')
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE, related_name='registrations')
     date_inscription = models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=20, default='inscrit', choices=STATUT_CHOICES)  # 'inscrit', 'annule', 'en_cours', 'success'
+    statut = models.CharField(max_length=20, default='inscrit', choices=STATUT_CHOICES)  # 'inscrit', 'en_cours', 'annule'
     class Meta:
         unique_together = ('participant', 'programme', 'statut')
 

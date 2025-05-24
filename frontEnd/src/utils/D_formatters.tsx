@@ -1,49 +1,54 @@
-export const formatDate = (dateString: string): string => {
-  if (!dateString) return "Date non disponible";
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return "Date invalide";
-    }
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  } catch (error) {
-    console.error("Error formatting date:", dateString, error);
+import { ProgramStatus } from "../types/programs";
+
+export function formatDate(date: Date, locale: string = "fr-FR"): string {
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
     return "Date invalide";
   }
-};
 
-export const getStatutColor = (statut?: string): string => {
+  const dayName = date.toLocaleDateString(locale, { weekday: "long" });
+  const dayNameCapitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+
+  const restOfDate = date.toLocaleDateString(locale, {
+    day: "numeric",
+    month: "long",
+  });
+
+  return `${dayNameCapitalized} ${restOfDate}`;
+}
+
+export const getStatutColor = (statut?: ProgramStatus | string): string => {
   switch (statut?.toLowerCase()) {
     case "confirmed":
-    case "approved":
-    case "inscrit":
       return "bg-green-100 text-green-700";
+    case "in_progress":
+      return "bg-sky-100 text-sky-700";
     case "pending":
       return "bg-yellow-100 text-yellow-700";
     case "cancelled":
-    case "rejected":
       return "bg-red-100 text-red-700";
+    case "terminated":
+      return "bg-blue-100 text-blue-700";
     default:
       return "bg-gray-100 text-gray-700";
   }
 };
 
-export const getStatutText = (statut?: string): string => {
+export const getStatutText = (statut?: ProgramStatus | string): string => {
   switch (statut?.toLowerCase()) {
     case "confirmed":
       return "Confirmé";
-    case "pending":
-      return "En attente";
+    case "in_progress":
+      return "En cours";
+    case "terminated":
+      return "Terminé";
     case "cancelled":
       return "Annulé";
-    case "approved":
-      return "Approuvé";
-    case "rejected":
-      return "Refusé";
     default:
-      return statut || "Inconnu";
+      if (statut) {
+        return (
+          statut.charAt(0).toUpperCase() + statut.slice(1).replace(/_/g, " ")
+        );
+      }
+      return "Inconnu";
   }
 };

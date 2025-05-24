@@ -8,7 +8,7 @@ urlpatterns= [
     path("user/", views.ProfileView.as_view(), name="user_profile"),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     # User related views
-    path('/user/community', views.UserCommunityView.as_view(), name='user_community'),
+    path('user/community', views.UserCommunityView.as_view(), name='user_community'),
     # Programme related views
     # Path for listing programmes (GET)
     path('programme/', views.ProgrammeView.as_view({'get': 'list'}), name='programme_list'),

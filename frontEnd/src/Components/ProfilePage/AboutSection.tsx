@@ -2,7 +2,7 @@ import React from "react";
 import { User as UserIcon } from "lucide-react";
 
 interface AboutSectionProps {
-  bio: string;
+  bio: string | undefined;
   expertises: string[] | undefined;
 }
 

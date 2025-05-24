@@ -6,22 +6,23 @@ import {
   getStatutText,
 } from "../../utils/D_formatters";
 import participantsIcon from "../../assets/icons/participants.svg";
+import { useAuth } from "../../Context/AuthContext";
 
 interface ActivitySectionProps {
-  userRole: string | undefined;
   registrations: any[]; // Définissez des types plus précis
   proposals: any[]; // Définissez des types plus précis
 }
 
 const ActivitySection: React.FC<ActivitySectionProps> = ({
-  userRole,
-  registrations,
-  proposals,
+  registrations = [],
+  proposals = [],
 }) => {
+  const { user } = useAuth();
+  if (!user) return;
   return (
     <section>
       <h2 className="text-xl font-semibold mb-4 flex items-center">
-        {userRole === "participant" ? (
+        {user.role === "participant" ? (
           <>
             <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
             Mes inscriptions
@@ -35,7 +36,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
       </h2>
       <div className="space-y-4">
         {/* Affichage conditionnel : liste des inscriptions OU liste des propositions */}
-        {userRole === "participant" ? (
+        {user.role === "participant" ? (
           // Affichage des inscriptions
           registrations.length > 0 ? (
             registrations.map((reg, index) => (
@@ -123,7 +124,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                   <strong>Dates souhaitées :</strong>
                   <ul className="list-disc list-inside mt-1">
                     {/* Utiliser les types explicites pour date et index */}
-                    {prop.preferred_dates.map((date: string, index: number) => (
+                    {prop.preferred_dates.map((date: Date, index: number) => (
                       <li key={index}>{formatDate(date)}</li>
                     ))}
                   </ul>

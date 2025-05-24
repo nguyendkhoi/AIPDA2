@@ -4,7 +4,6 @@ import { Navigate } from "react-router-dom";
 
 const ProgramsDashBoardRoute = () => {
   const { user } = useAuth();
-  console.log("what is participation type ", user?.role);
   return user?.role === "animateur" ? (
     <ProgramsDashboard />
   ) : (

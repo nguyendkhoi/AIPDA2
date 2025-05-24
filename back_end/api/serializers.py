@@ -10,6 +10,12 @@ class NestedUserSerializer(serializers.ModelSerializer):
 
 class UserSerializers(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
+    expertises = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        required=False,
+        allow_empty=True
+    )
+
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'name', 'role', 'telephone',
@@ -22,8 +28,8 @@ class UserSerializers(serializers.ModelSerializer):
             }
         
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Un compte existe déjà avec cet email. Veuillez vous connecter.")
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Un compte existe avec cet email. Connectez-vous.")
         return value
     
     def validate(self, data):
@@ -124,11 +130,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
 # Programme
 class ProgrammeSerializers(serializers.ModelSerializer):
     animateur = NestedUserSerializer(read_only=True)
-    nb_participants_actuel = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Programme
-        fields = ['id', 'name', 'animateur', 'statut', 'edition_du_Tour', 'nb_participants_actuel',
+        fields = ['id', 'name', 'animateur', 'statut', 'edition_du_Tour', 'current_participant_count',
                   'nb_participants_max', 'duration_hours', 
                   'theme', 'start_date', 'description', 'creation_date']
         extra_kwargs = {
@@ -152,16 +157,8 @@ class ProgrammeSerializers(serializers.ModelSerializer):
         programme = Programme.objects.create(**validated_data)
         return programme
     
-    def get_nb_participants_actuel(self, obj):
-        if hasattr(obj, 'participants') and obj.participants.exists():
-             return obj.participants.count()
-        elif hasattr(obj, '_prefetched_objects_cache') and 'participants' in obj._prefetched_objects_cache:
-             return len(obj._prefetched_objects_cache['participants'])
-        return 0
-
 class ProgrammeSpecificSerializer(serializers.ModelSerializer):
     participants = NestedUserSerializer(many=True, read_only=True)
-    nb_participants_actuel = serializers.SerializerMethodField()
 
     class Meta:
         model = Programme
@@ -169,7 +166,7 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
             'name',
             'edition_du_Tour',
             'nb_participants_max', 
-            'nb_participants_actuel',  
+            'current_participant_count',  
             'participants',          
             'duration_hours',
             'theme',
@@ -178,13 +175,6 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
             'creation_date',
             'statut',
         ]
-
-    def get_nb_participants_actuel(self, obj):
-        if hasattr(obj, '_prefetched_objects_cache') and 'participants' in obj._prefetched_objects_cache:
-             return len(obj._prefetched_objects_cache['participants'])
-        elif hasattr(obj, 'participants'):
-             return obj.participants.count()
-        return 0
     
 class NestedProgramme(serializers.ModelSerializer):
     class Meta:

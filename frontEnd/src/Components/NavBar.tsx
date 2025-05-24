@@ -187,6 +187,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
+                    redirectTo("/programs");
                   }}
                   className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md cursor-pointer"
                 >
@@ -196,6 +197,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
+                    redirectTo("community");
                   }}
                   className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md cursor-pointer"
                 >
@@ -208,6 +210,7 @@ const Navbar = () => {
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);
+                        redirectTo("/profile");
                       }}
                       className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md"
                     >
@@ -217,7 +220,6 @@ const Navbar = () => {
                     <button
                       onClick={() => {
                         setIsUserMenuOpen(false);
-                        //setShowDashboard(true);
                         redirectTo("/dashboard");
                       }}
                       className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-50 transition"
@@ -241,7 +243,7 @@ const Navbar = () => {
                   <>
                     <button
                       onClick={() => {
-                        //setIsLoginModalOpen(true);
+                        redirectTo("/connexion");
                         setIsMenuOpen(false);
                       }}
                       className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md "
@@ -251,8 +253,8 @@ const Navbar = () => {
                     </button>
                     <button
                       onClick={() => {
-                        //onOpenSignup();
                         setIsMenuOpen(false);
+                        redirectTo("/inscription");
                       }}
                       className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-indigo-50 rounded-md"
                     >

@@ -1,11 +1,43 @@
 import { User } from "./user";
 
+//Type
+//====================================================================================================================
+export type ProgramStatus =
+  | "pending"
+  | "confirmed"
+  | "terminated"
+  | "in_progress"
+  | "cancelled";
+
+export type ProgramType = "Webinaire" | "Atelier" | "Talk";
+
+export type AtelierType =
+  | "Atelier de conception graphique"
+  | "Atelier de Design de marque"
+  | "Atelier de Design social";
+
+export type TalkType =
+  | "Le design au service des styles"
+  | "Le design au service des processus"
+  | "Le design au services des stratégies";
+
+export type GlobalType =
+  | "Design Thinking"
+  | "Agilité"
+  | "Innovation"
+  | "Leadership"
+  | "Communication";
+
+export type Edition = "Avril 2025" | "Juin 2025" | "Août 2025";
+
+//Data Structures
+//==============================================================================================
 export interface ReservationResponse {
   id: number;
   programme: number;
   participant: number;
   date_reservation: string;
-  statut: string; // "pending", "confirmed", "cancelled"
+  status: string; // "pending", "confirmed", "cancelled"
   message?: string;
 }
 
@@ -14,28 +46,44 @@ export interface WorkshopFormData {
   name: string;
   theme: string;
   description: string;
-  start_date: string; // Consider 'YYYY-MM-DD' string format
+  start_date: string;
   nb_participants_max: number;
 }
 
-export interface AnimateurProgrammeAPIResponse {
+export interface Campaign {
+  month: string;
+  weeks: Week[];
+}
+
+export interface Week {
+  weekNumber: number;
+  sessions: Workshop[];
+}
+
+export interface Workshop {
   duration_hours?: number;
   id: string;
   edition_du_Tour: string;
-  name: string; // Correspond à `type`
-  theme: string; // Correspond à `subtype`
-  title: string; // Ajout pour `title`
-  description: string; // Ajout pour `description`
-  nb_participants_max: number; // Correspond à `max participants`
-  nb_participants_actuel: number; // Correspond à `nombre de participants actuel`
-  statut: string; // Correspond à `status`
-  creation_date: string; // Correspond à `Date de création`
-  start_date: string; // Correspond à `Date de début`
+  name: string;
+  theme: string;
+  status?: string;
+  title: string;
+  description: string;
+  nb_participants_max: number;
+  current_participant_count: number;
+  creation_date: string;
+  start_date: string;
   animateur: User;
 }
 
-export interface ReservationResponse {
-  status?: string;
-  message?: string;
-  registration_id?: number;
+export interface Session {
+  id: number;
+  date: Date;
+  type: ProgramType;
+  theme: string | null;
+  availableSpots: number;
+  current_participant_count: number;
+  description?: string;
+  duration_hours: string | null;
+  animateur: User;
 }

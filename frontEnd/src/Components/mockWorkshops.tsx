@@ -19,20 +19,20 @@ const animateurBob: User = {
 export const mockWorkshops: Workshop[] = [
   // --- Workshops Passés ---
   {
-    id: "ws-001", // ID unique pour le workshop
-    animateur: animateurAlice, // Utilise l'objet User directement
-    edition_du_Tour: "Avril 2025", // Édition
-    name: "atelier", // Type de programme
-    theme: "Principes de base de la conception graphique", // Thème
-    title: "Atelier Conception Graphique 101", // Titre spécifique
+    id: "ws-001",
+    animateur: animateurAlice,
+    edition_du_Tour: "Avril 2025",
+    name: "atelier",
+    theme: "Principes de base de la conception graphique",
+    title: "Atelier Conception Graphique 101",
     description:
-      "Introduction aux outils et techniques de conception graphique.", // Description
-    nb_participants_max: 15, // Max participants
-    nb_participants_actuel: 12, // Participants actuels
-    statut: "confirme", // Statut
-    creation_date: new Date("2025-03-10T10:00:00Z").toISOString(), // Date de création
-    start_date: "2025-04-15", // Date de début
-    duration_hours: 3, // Durée optionnelle
+      "Introduction aux outils et techniques de conception graphique.",
+    nb_participants_max: 15,
+    current_participant_count: 12,
+    statut: "confirme",
+    creation_date: new Date("2025-03-10T10:00:00Z").toISOString(),
+    start_date: "2025-12-15",
+    duration_hours: 3,
   },
   {
     id: "ws-002",
@@ -43,7 +43,7 @@ export const mockWorkshops: Workshop[] = [
     title: "Webinaire sur le Leadership",
     description: "Développer ses compétences en leadership pour l'ère moderne.",
     nb_participants_max: 50,
-    nb_participants_actuel: 45,
+    current_participant_count: 45,
     statut: "confirme",
     creation_date: new Date("2025-03-15T11:00:00Z").toISOString(),
     start_date: "2025-04-20",
@@ -59,7 +59,7 @@ export const mockWorkshops: Workshop[] = [
     title: "Talk: Le Design Stratégique",
     description: "Comment intégrer le design dans la stratégie d'entreprise.",
     nb_participants_max: 30,
-    nb_participants_actuel: 5,
+    current_participant_count: 5,
     statut: "confirme",
     creation_date: new Date("2025-04-01T09:00:00Z").toISOString(),
     start_date: "2025-04-25",
@@ -67,7 +67,7 @@ export const mockWorkshops: Workshop[] = [
   },
   {
     id: "ws-004",
-    animateur: animateurAlice, // <- Corrigé: utilise l'objet User
+    animateur: animateurAlice,
     edition_du_Tour: "Juin 2025",
     name: "atelier",
     theme: "Design Social et Impact Local",
@@ -75,22 +75,22 @@ export const mockWorkshops: Workshop[] = [
     description:
       "Utiliser le design pour résoudre des problèmes sociaux locaux.",
     nb_participants_max: 20,
-    nb_participants_actuel: 0,
-    statut: "en_attente", // Statut en attente
-    creation_date: new Date("2025-04-10T14:30:00Z").toISOString(),
+    current_participant_count: 0,
+    statut: "en_attente",
+    creation_date: new Date("2025-07-10T14:30:00Z").toISOString(),
     start_date: "2025-05-05",
     duration_hours: 2.5,
   },
   {
     id: "ws-005",
-    animateur: animateurBob, // <- Corrigé: utilise l'objet User
+    animateur: animateurBob,
     edition_du_Tour: "Juin 2025",
     name: "webinaire",
     theme: "Communication Interpersonnelle",
     title: "Webinaire Communication Efficace",
     description: "Techniques pour améliorer sa communication au quotidien.",
     nb_participants_max: 100,
-    nb_participants_actuel: 15,
+    current_participant_count: 15,
     statut: "confirme",
     creation_date: new Date("2025-04-20T10:00:00Z").toISOString(),
     start_date: "2025-05-15",

@@ -13,19 +13,18 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url 
-
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
+# Security settings
+# ==============================================================================
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-pn5q5445zueh5cbzp!k@ppfpn)^%d6thnef-v1c4p-k!1ux7e1') # Giữ key mặc định cho local nếu không có biến môi trường
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-pn5q5445zueh5cbzp!k@ppfpn)^%d6thnef-v1c4p-k!1ux7e1')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
@@ -45,11 +44,10 @@ if not DEBUG and not ALLOWED_HOSTS:
         if DEBUG:
              ALLOWED_HOSTS.append('*')
 
-SQLITE_DEFAULT_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
-
+print ("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
 # Application definition
-
+# ==============================================================================
 INSTALLED_APPS = [
     'back_end.api.apps.ApiConfig',
     'rest_framework',
@@ -65,8 +63,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,9 +75,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'back_end.back_end.urls'
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
+
 
 TEMPLATES = [
     {
@@ -99,62 +95,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'back_end.back_end.wsgi.application'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-    "https://aipda-fe.onrender.com"
-]
-
-CORS_ALLOWED_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "DELETE",
-    "OPTIONS",
-]
-
-CORS_ALLOWED_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-]
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', SQLITE_DEFAULT_URL),
-        conn_max_age=600,
-    )
-}
-
+# Authentication and Authorization
+# ==============================================================================
 AUTH_USER_MODEL = 'api.User'
 
-# settings.py
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
-# ... other settings ...
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ]
-}
-
-# ... other settings ...
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -170,23 +120,79 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Database
+#==============================================================================
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+SQLITE_DEFAULT_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 
-# Internationalization
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', SQLITE_DEFAULT_URL),
+        conn_max_age=600,
+    )
+}
+
+print ("DATABASE_URL:", os.environ.get('DATABASE_URL', SQLITE_DEFAULT_URL))
+
+#Third party apps
+#==============================================================================
+
+# Django REST framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
+
+# CORS (Cross-Origin Resource Sharing)
+CORS_ALLOWED_ORIGINS = [
+    "https://localhost:5173",
+    "https://localhost:3000",
+    "http://localhost:5173",
+    "https://aipda-fe.onrender.com"
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOWED_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+#Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'fr-fr'
+TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
+#==============================================================================
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # This production code might break development mode, so we check whether we're in DEBUG mode
 if not DEBUG:
@@ -200,4 +206,5 @@ if not DEBUG:
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
+# Other settings
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

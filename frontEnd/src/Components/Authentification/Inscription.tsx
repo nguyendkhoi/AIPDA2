@@ -37,7 +37,7 @@ export default function Inscription() {
     profession: "",
     organisation: "",
     lien_portfolio: "",
-    expertises: ["", "", "", "", ""],
+    expertises: ["", ""],
   });
 
   const { redirectTo } = useRedirection();

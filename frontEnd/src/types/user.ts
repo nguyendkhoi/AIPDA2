@@ -1,5 +1,4 @@
 export interface User {
-  id: string;
   name: string;
   first_name?: string;
   role: string;
@@ -7,9 +6,10 @@ export interface User {
 }
 
 export interface UserProfileApiResponse {
-  name: string;
-  bio: string;
-  expertises: string[];
+  name?: string;
+  first_name?: string;
+  bio?: string;
+  expertises?: string[];
 }
 
 export interface UserRegistrationsResponse {

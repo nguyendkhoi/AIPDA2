@@ -6,11 +6,7 @@ import {
   ChangeEvent,
   useMemo,
 } from "react";
-import { Edition, Workshop } from "../../types/types.ts";
-import {
-  WorkshopFormData,
-  AnimateurProgrammeAPIResponse,
-} from "../../types/programs.ts";
+import { WorkshopFormData, Workshop, Edition } from "../../types/programs.ts";
 import { useAuth } from "../../Context/AuthContext.tsx";
 import {
   getAnimateurProgrammes,
@@ -48,18 +44,18 @@ export const hookProgramsDashboard = ({
     try {
       const rawProgrammes = await getAnimateurProgrammes();
       const formattedWorkshops: Workshop[] = rawProgrammes.map(
-        (programme: AnimateurProgrammeAPIResponse) => ({
+        (programme: Workshop) => ({
           id: String(programme.id),
           edition_du_Tour: programme.edition_du_Tour,
           name: programme.name,
           theme: programme.theme,
-          duration_hours: programme.duration_hours || 0, // This field is not used in the UI provided
+          duration_hours: programme.duration_hours || 0,
           description: programme.description,
           start_date: programme.start_date,
           nb_participants_max: programme.nb_participants_max,
-          statut: programme.statut,
+          statut: programme.status,
           creation_date: programme.creation_date,
-          nb_participants_actuel: programme.nb_participants_actuel ?? 0,
+          current_participant_count: programme.current_participant_count ?? 0,
           animateur: programme.animateur,
           title: programme.name || "",
         })

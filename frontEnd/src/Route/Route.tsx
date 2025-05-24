@@ -9,6 +9,7 @@ import ProgramsPage from "../Components/Program/ProgramsPage.tsx";
 import DashBoardRoute from "./RouteProtected/DashBoardRoute.tsx";
 import ProgramsDashBoardRoute from "./RouteProtected/ProgramsDashBoardRoute.tsx";
 import CommunityPage from "../Components/Communaute/CommutyPages.tsx";
+import AuthentificationRoute from "./RouteProtected/AuthentificationRoute.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -18,14 +19,6 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <LandingPage />,
-      },
-      {
-        path: "inscription",
-        element: <Inscription />,
-      },
-      {
-        path: "connexion",
-        element: <Connexion />,
       },
       {
         path: "profile",
@@ -50,6 +43,19 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <DashBoardRoute />,
+      },
+      {
+        element: <AuthentificationRoute />,
+        children: [
+          {
+            path: "inscription",
+            element: <Inscription />,
+          },
+          {
+            path: "connexion",
+            element: <Connexion />,
+          },
+        ],
       },
     ],
     errorElement: <p>Erreur 404</p>,

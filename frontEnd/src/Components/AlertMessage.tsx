@@ -11,7 +11,7 @@ interface AlertMessageProps {
 const AlertMessage: React.FC<AlertMessageProps> = ({
   message,
   type = "info",
-  duration = 6666600,
+  duration = 5000,
   onDismiss,
 }) => {
   const [isVisible, setIsVisible] = useState(false);

@@ -1,13 +1,13 @@
-// src/pages/ProfilePage/ProfileEditForm.tsx
 import React from "react";
-import { Loader2, X } from "lucide-react"; // Assurez-vous que X est utilisé ou supprimez-le
+import { Loader2, X } from "lucide-react";
+import { UserProfileApiResponse } from "../../types/user";
 
 interface ProfileEditFormProps {
-  name: string;
-  setName: (name: string) => void;
-  bio: string;
-  setBio: (bio: string) => void;
-  expertise: string[];
+  userProfile: UserProfileApiResponse | null;
+  onProfileChange: (
+    field: keyof UserProfileApiResponse,
+    value: string | string[] | undefined
+  ) => void;
   handleExpertiseChange: (index: number, value: string) => void;
   handleAddExpertiseField: () => void;
   handleRemoveExpertiseField: (index: number) => void;
@@ -17,11 +17,8 @@ interface ProfileEditFormProps {
 }
 
 const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
-  name,
-  setName,
-  bio,
-  setBio,
-  expertise,
+  userProfile,
+  onProfileChange,
   handleExpertiseChange,
   handleAddExpertiseField,
   handleRemoveExpertiseField,
@@ -29,19 +26,36 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   onCancel,
   isSaving,
 }) => {
+  if (!userProfile) {
+    return null;
+  }
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* Champ Nom Complet */}
+      {/* Champ Nom */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Nom complet
+          Nom
         </label>
         <input
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={userProfile.name || ""}
+          onChange={(e) => onProfileChange("name", e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           required
+        />
+      </div>
+
+      {/* Champ Prénom (First Name) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Prénom
+        </label>
+        <input
+          type="text"
+          value={userProfile.first_name || ""}
+          onChange={(e) => onProfileChange("first_name", e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         />
       </div>
 
@@ -51,8 +65,8 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
           Biographie
         </label>
         <textarea
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          value={userProfile.bio || ""}
+          onChange={(e) => onProfileChange("bio", e.target.value)}
           rows={4}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Parlez-nous de vous..."
@@ -64,8 +78,8 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Expertises
         </label>
-        {Array.isArray(expertise) &&
-          expertise.map((exItem, index) => (
+        {Array.isArray(userProfile.expertises) &&
+          userProfile.expertises.map((exItem, index) => (
             <div key={index} className="flex items-center gap-2 mb-2">
               <input
                 type="text"
@@ -74,7 +88,8 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder={`Expertise ${index + 1}`}
               />
-              {expertise.length > 0 && (
+              {/* Only show remove button if there's more than one expertise or if it's not the last remaining empty field */}
+              {userProfile.expertises!.length > 0 && (
                 <button
                   type="button"
                   onClick={() => handleRemoveExpertiseField(index)}
