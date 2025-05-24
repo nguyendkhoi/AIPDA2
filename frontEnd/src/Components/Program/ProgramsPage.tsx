@@ -73,9 +73,8 @@ const ProgramsPage = () => {
       }
 
       const animateurInfo = workshop.animateur;
-      const animateurSessionData = animateurInfo?.id
+      const animateurSessionData = animateurInfo
         ? {
-            id: animateurInfo.id,
             name:
               `${animateurInfo.name || ""} ${
                 animateurInfo.first_name || ""

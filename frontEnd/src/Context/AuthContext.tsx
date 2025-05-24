@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Workshop, Session } from "../types/programs";
 import { AuthLoginData, AuthSignupData } from "../types/auth";
 import { AlertInfo } from "../types/common";
-import { User, UserProfileApiResponse } from "../types/user";
+import { User } from "../types/user";
 
 import { loginUser, signupUser, logoutUser } from "../api/auth";
 import { addParticipantToProgram } from "../api/programs";
