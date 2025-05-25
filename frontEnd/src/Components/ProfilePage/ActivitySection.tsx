@@ -54,7 +54,8 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                       {reg.programme?.edition_du_Tour}
                     </p>
                     <p className="text-sm text-gray-500 mt-2">
-                      {formatDate(reg.programme?.start_date) || "Type inconnu"}
+                      Débutez le :{" "}
+                      {formatDate(new Date(reg.programme?.start_date))}
                     </p>
                   </div>
                   <span
@@ -68,7 +69,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                 </div>
                 {/* Afficher la date d'inscription  */}
                 <p className="mt-3 text-gray-600 text-sm border-t pt-3">
-                  {formatDate(reg.date_inscription)}
+                  Inscription : {formatDate(new Date(reg.date_inscription))}
                 </p>
               </div>
             ))
@@ -80,56 +81,50 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
           )
         ) : // Affichage des propositions (si pas participant)
         proposals.length > 0 ? (
-          proposals.map((prop) => (
+          proposals.map((proposal) => (
             <div
-              key={prop.id}
+              key={proposal.id}
               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
             >
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-semibold text-lg">
-                    {prop.nom || "Titre indisponible"}
+                    {proposal.name || "Titre indisponible"}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Proposé le {formatDate(prop.creation_date)}
+                    Proposé le {formatDate(new Date(proposal.creation_date))}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
-                    {prop.theme || "Type inconnu"}{" "}
+                    {proposal.theme || "Type inconnu"}{" "}
                     {/* Afficher le sous-type s'il existe */}
-                    {prop.subtype && `- ${prop.subtype}`}
+                    {proposal.subtype && `- ${proposal.subtype}`}
                   </p>
                 </div>
                 <div>
                   <p // Affichage du statut avec couleur dynamique
                     className={`flex justify-center px-3 py-1 rounded-full text-sm ${getStatutColor(
-                      prop.statut
+                      proposal.statut
                     )}`}
                   >
-                    {getStatutText(prop.statut)}
+                    {getStatutText(proposal.statut)}
                   </p>
                   <p
                     className={`inline-flex px-3 py-1 rounded-full text-sm mt-2 bg-gray-100`}
                   >
-                    <img src={participantsIcon} />
-                    {prop.nb_participants_actuel} / {prop.nb_participants_max}{" "}
+                    <img src={participantsIcon} />{" "}
+                    {proposal.current_participant_count} /{" "}
+                    {proposal.nb_participants_max}{" "}
                   </p>
                 </div>
               </div>
               <p className="mt-3 text-gray-600 border-t pt-3">
-                {prop.description || "Pas de description"}
+                Description: {proposal.description || "Pas de description"}
               </p>
               {/* Afficher les dates souhaitées si elles existent */}
-              {prop.preferred_dates && prop.preferred_dates.length > 0 && (
-                <div className="mt-3 text-sm text-gray-500">
-                  <strong>Dates souhaitées :</strong>
-                  <ul className="list-disc list-inside mt-1">
-                    {/* Utiliser les types explicites pour date et index */}
-                    {prop.preferred_dates.map((date: Date, index: number) => (
-                      <li key={index}>{formatDate(date)}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div className="mt-3 text-sm text-gray-500">
+                <strong>Dates souhaitées : </strong>
+                {formatDate(new Date(proposal.start_date))}
+              </div>
             </div>
           ))
         ) : (

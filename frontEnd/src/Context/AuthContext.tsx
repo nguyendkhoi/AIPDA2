@@ -7,7 +7,6 @@ import { AlertInfo } from "../types/common";
 import { User } from "../types/user";
 
 import { loginUser, signupUser, logoutUser } from "../api/auth";
-import { addParticipantToProgram } from "../api/programs";
 
 interface AuthContextProps {
   isSaving: boolean;
@@ -23,7 +22,6 @@ interface AuthContextProps {
   setAuthToken: (authToken: string | null) => void;
   userWorkshop: Workshop[];
   setUserWorkshop: (workshop: Workshop[]) => void;
-  handleReservation: (programId: number, onSucces: () => void) => Promise<void>;
   setSelectedProgramForView: (session: Session | null) => void;
   selectedProgramForView: Session | null;
   alertInfo: AlertInfo | null;
@@ -169,31 +167,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     navigate("/");
   };
 
-  const handleReservation = async (
-    programId: number,
-    onSucces?: () => void
-  ) => {
-    if (!authToken) {
-      setAlertInfo({
-        message: "Vous devez être connecté pour réserver.",
-        type: "error",
-      });
-      return;
-    }
-
-    try {
-      await addParticipantToProgram(programId);
-
-      onSucces && onSucces();
-      setAlertInfo({ message: "Réservation réussie !", type: "success" });
-    } catch (error: any) {
-      let messageError = error.response.data.detail
-        ? error.response.data.detail
-        : "Error during reservation:";
-      setAlertInfo({ message: messageError, type: "error" });
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -208,7 +181,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         authToken,
         setAuthToken,
         handleLogin,
-        handleReservation,
         setSelectedProgramForView,
         selectedProgramForView,
         isSaving,

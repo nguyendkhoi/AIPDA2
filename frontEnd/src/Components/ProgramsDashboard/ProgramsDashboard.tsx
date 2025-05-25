@@ -245,7 +245,7 @@ const ProgramsDashboard: React.FC = () => {
                 >
                   <option value="">-- Choisir --</option>
                   {PROGRAMS.map((program) => (
-                    <option key={program} value={program.toLowerCase()}>
+                    <option key={program} value={program.toLocaleLowerCase()}>
                       {program}
                     </option>
                   ))}

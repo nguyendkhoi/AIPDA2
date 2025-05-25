@@ -68,7 +68,7 @@ class User(AbstractUser):
         return f"{self.name} {self.first_name}"
     
 class Programme(models.Model):
-    NOM_CHOICES = [
+    NAME_CHOICES = [
         ('webinaire', 'Webinaire'),
         ('atelier', 'Atelier'),
         ('talk', 'Talk')
@@ -80,7 +80,7 @@ class Programme(models.Model):
         ('in_progress', 'In progress'),
         ('cancelled', 'Cancelled'),
     ]
-    name = models.CharField(max_length=100, blank=True, null=True, choices=NOM_CHOICES)
+    name = models.CharField(max_length=100, blank=True, null=True, choices=NAME_CHOICES)
     theme = models.CharField(max_length=100, blank=True, null=True)
     animateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='programmes_animateur')
     edition_du_Tour = models.CharField(max_length=20, blank=True, null=True)

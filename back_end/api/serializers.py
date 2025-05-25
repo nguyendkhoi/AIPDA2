@@ -92,7 +92,7 @@ class UserProfileSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['name', 'bio', 'expertises_input', 'expertises']
+        fields = ['name', 'first_name', 'bio', 'expertises_input', 'expertises']
 
     def get_expertises(self, instance):
 
@@ -130,6 +130,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 # Programme
 class ProgrammeSerializers(serializers.ModelSerializer):
     animateur = NestedUserSerializer(read_only=True)
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = Programme
@@ -157,8 +158,12 @@ class ProgrammeSerializers(serializers.ModelSerializer):
         programme = Programme.objects.create(**validated_data)
         return programme
     
+    def get_name(self, obj):
+        return obj.get_name_display()
+    
 class ProgrammeSpecificSerializer(serializers.ModelSerializer):
     participants = NestedUserSerializer(many=True, read_only=True)
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = Programme
@@ -175,13 +180,22 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
             'creation_date',
             'statut',
         ]
-    
+
+    def get_name(self, obj):
+        return obj.get_name_display()
+
+
 class NestedProgramme(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model = Programme
         fields = ['id', 'name', 'edition_du_Tour', 'start_date']
         read_only_fields = fields
 
+    def get_name(self, obj):
+        return obj.get_name_display()
+    
 # Registration
 class RegistrationSerializers(serializers.ModelSerializer):
     programme = NestedProgramme(read_only=True)

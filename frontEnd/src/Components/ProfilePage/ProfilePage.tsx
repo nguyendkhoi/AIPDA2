@@ -29,7 +29,8 @@ const ProfilePage = () => {
   // States for other data and UI
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [proposals, setProposals] = useState<any[]>([]);
-
+  console.log("registration: ", registrations);
+  console.log("proposals: ", proposals);
   useEffect(() => {
     const fetchProfile = async () => {
       console.log("Fetch profile");
@@ -204,7 +205,7 @@ const ProfilePage = () => {
 
   // --- Render logic for loading and error states ---
   if (typeof user === "undefined") {
-    return <ProfileLoading />; // User context not yet loaded
+    return <ProfileLoading />;
   }
 
   if (user === null) {
@@ -216,7 +217,6 @@ const ProfilePage = () => {
   }
 
   if (userProfile === null) {
-    // If user exists but userProfile hasn't been fetched yet
     return <ProfileLoading />;
   }
 
@@ -227,7 +227,7 @@ const ProfilePage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <ProfileHeader
-              name={user.name + "" + user.first_name}
+              name={user.name + " " + user.first_name}
               role={user.role}
               onToggleEdit={handleToggleEdit}
               onLogout={handleLogout}

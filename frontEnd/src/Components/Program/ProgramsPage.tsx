@@ -4,6 +4,8 @@ import { ProgramCard } from "./ProgramsCard.tsx";
 import { Workshop, ProgramType, Session } from "../../types/programs.ts";
 
 import { getAllPrograms } from "../../api/programs.ts";
+import { addParticipantToProgram } from "../../api/programs";
+import AlertMessage from "../AlertMessage.tsx";
 
 function getWeekNumber(d: Date): number {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -16,12 +18,38 @@ function getWeekNumber(d: Date): number {
 }
 
 const ProgramsPage = () => {
-  const { user, handleReservation, setSelectedProgramForView } = useAuth();
+  const { user, setSelectedProgramForView, setAlertInfo, alertInfo } =
+    useAuth();
 
   const [programs, setPrograms] = useState<Workshop[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleReservation = async (
+    programId: number,
+    onSucces?: () => void
+  ) => {
+    if (!user) {
+      setAlertInfo({
+        message: "Vous devez être connecté pour réserver.",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      await addParticipantToProgram(programId);
+
+      onSucces && onSucces();
+      setAlertInfo({ message: "Réservation réussie !", type: "success" });
+    } catch (error: any) {
+      let messageError = error.response.data.detail
+        ? error.response.data.detail
+        : "Error during reservation:";
+      setAlertInfo({ message: messageError, type: "error" });
+    }
+  };
 
   const fetchPrograms = useCallback(async () => {
     setIsLoading(true);
@@ -223,6 +251,7 @@ const ProgramsPage = () => {
           </div>
         </div>
       </div>
+      <AlertMessage message={alertInfo?.message ?? ""} type={alertInfo?.type} />
     </div>
   );
 };
