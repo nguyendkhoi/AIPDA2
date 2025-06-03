@@ -43,6 +43,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ('participant', 'Participant'),
         ('animateur', 'Animateur'),
+        ('admin', "Admin")
     ]
     username = None
     email = models.EmailField(('email address'), unique=True)
@@ -73,7 +74,7 @@ class Programme(models.Model):
         ('atelier', 'Atelier'),
         ('talk', 'Talk')
     ]
-    STATUT_CHOICES = [
+    STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('terminated', 'Terminated'),
@@ -84,7 +85,7 @@ class Programme(models.Model):
     theme = models.CharField(max_length=100, blank=True, null=True)
     animateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='programmes_animateur')
     edition_du_Tour = models.CharField(max_length=20, blank=True, null=True)
-    statut = models.CharField(max_length=20, default='en_attente', choices=STATUT_CHOICES)  # 'en_attente', 'confirme', 'annule'
+    status = models.CharField(max_length=20, default='en_attente', choices=STATUS_CHOICES)  # 'en_attente', 'confirme', 'annule'
     nb_participants_max = models.PositiveIntegerField(default=0)
     duration_hours = models.IntegerField(default=0)
     start_date = models.DateTimeField()
@@ -93,7 +94,7 @@ class Programme(models.Model):
     
     @property
     def current_participant_count(self):
-        return self.registrations.filter(statut='inscrit').count()
+        return self.registrations.filter(status='inscrit').count()
 
     def __str__(self):
         return self.name
@@ -101,16 +102,15 @@ class Programme(models.Model):
 class Registration(models.Model):
     STATUT_CHOICES = [
         ('registered', 'Registered'),
-        ('in_progress', 'In progress'),
         ('cancelled', 'Cancelled'),
         ('success', 'Success'),
     ]
     participant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registrations_as_participant')
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE, related_name='registrations')
     date_inscription = models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=20, default='inscrit', choices=STATUT_CHOICES)  # 'inscrit', 'en_cours', 'annule'
+    status = models.CharField(max_length=20, default='inscrit', choices=STATUT_CHOICES)  # 'inscrit', 'en_cours', 'annule'
     class Meta:
-        unique_together = ('participant', 'programme', 'statut')
+        unique_together = ('participant', 'programme', 'status')
 
     def __str__(self):
         programme_title = self.programme.theme or self.programme.get_name_display()

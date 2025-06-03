@@ -14,6 +14,13 @@ class IsParticipant(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and getattr(request.user, 'role', None) == 'participant'
+    
+class IsAdmin(permissions.BasePermission):
+    """
+    Allows access only to users with the 'admin' role.
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and getattr(request.user, 'role', None) == 'admin'
 
 class IsAnimateurOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -21,13 +28,14 @@ class IsAnimateurOwnerOrReadOnly(permissions.BasePermission):
     Assumes the model instance has an `animateur` attribute.
     Allows read-only access for any authenticated user.
     """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+    
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
-            return request.user and request.user.is_authenticated
+            return True
 
-        return (request.user and
-                request.user.is_authenticated and
-                getattr(request.user, 'role', None) == 'animateur' and
+        return (getattr(request.user, 'role', None) == 'animateur' and
                 obj.animateur == request.user)
 
 class IsAnimateurOrParticipantReadOnly(permissions.BasePermission):

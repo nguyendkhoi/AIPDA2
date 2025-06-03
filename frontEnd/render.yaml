@@ -1,0 +1,35 @@
+# render.yaml
+
+services:
+  - type: web
+    name: AIPDIA-BACKEND
+    env: python
+    region: frankfurt
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /healthz/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.5"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: my-postgres-db
+          property: connectionString
+
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+        python ./back_end/manage.py migrate
+    startCommand: "gunicorn back_end.wsgi:application -k uvicorn.workers.UvicornWorker"
+
+  - type: psql
+    name: AIPDIA-DB
+    region: frankfurt
+    plan: starter
+    # postgresqlVersion: 15
+    # ipAllowList: []

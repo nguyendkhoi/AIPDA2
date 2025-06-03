@@ -1,4 +1,4 @@
-import { User } from "./user";
+import { User, DetailedUser } from "./user";
 
 //Type
 //====================================================================================================================
@@ -48,6 +48,7 @@ export interface WorkshopFormData {
   description: string;
   start_date: string;
   nb_participants_max: number;
+  status?: string;
 }
 
 export interface Campaign {
@@ -61,7 +62,7 @@ export interface Week {
 }
 
 export interface Workshop {
-  duration_hours?: number;
+  animateur: User;
   id: string;
   edition_du_Tour: string;
   name: string;
@@ -73,7 +74,22 @@ export interface Workshop {
   current_participant_count: number;
   creation_date: string;
   start_date: string;
-  animateur: User;
+  duration_hours?: string | null;
+}
+
+export interface DetailedWorkshop {
+  animateur: DetailedUser;
+  id: string;
+  name: string;
+  status: string;
+  edition_du_Tour: string;
+  current_participant_count: Number;
+  nb_participants_max: Number;
+  duration_hours: string | null;
+  theme: string;
+  description: string;
+  start_date: Date;
+  creation_date: Date;
 }
 
 export interface Session {

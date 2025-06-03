@@ -3,7 +3,6 @@ import { useAuth } from "../../Context/AuthContext";
 
 import ProfileLoading from "./ProfileLoading";
 import UserNotLoaded from "./UserNotLoaded";
-import AlertMessage from "../AlertMessage";
 import ProfileHeader from "./ProfileHeader";
 import ProfileEditForm from "./ProfileEditForm";
 import ProfileInfoDisplay from "./ProfileInfoDisplay";
@@ -16,8 +15,7 @@ import {
 import { getUserProfile, updateUserProfile } from "../../api/user";
 
 const ProfilePage = () => {
-  const { user, setUser, handleLogout, alertInfo, setAlertInfo, setAuthToken } =
-    useAuth();
+  const { user, setUser, handleLogout, setAlertInfo, setAuthToken } = useAuth();
 
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -257,14 +255,6 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-      {alertInfo && (
-        <AlertMessage
-          key={alertInfo.key}
-          message={alertInfo.message}
-          type={alertInfo.type}
-          onDismiss={() => setAlertInfo(null)}
-        />
-      )}
     </>
   );
 };

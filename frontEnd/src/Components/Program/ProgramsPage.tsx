@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../Context/AuthContext.tsx";
 import { ProgramCard } from "./ProgramsCard.tsx";
 import { Workshop, ProgramType, Session } from "../../types/programs.ts";
-
+import { ProgramModal } from "./ProgramModal";
 import { getAllPrograms } from "../../api/programs.ts";
 import { addParticipantToProgram } from "../../api/programs";
-import AlertMessage from "../AlertMessage.tsx";
 
 function getWeekNumber(d: Date): number {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -18,9 +17,9 @@ function getWeekNumber(d: Date): number {
 }
 
 const ProgramsPage = () => {
-  const { user, setSelectedProgramForView, setAlertInfo, alertInfo } =
-    useAuth();
-
+  const { user, setAlertInfo } = useAuth();
+  const [selectedProgramForView, setSelectedProgramForView] =
+    useState<Session | null>(null);
   const [programs, setPrograms] = useState<Workshop[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -251,7 +250,12 @@ const ProgramsPage = () => {
           </div>
         </div>
       </div>
-      <AlertMessage message={alertInfo?.message ?? ""} type={alertInfo?.type} />
+      {selectedProgramForView && (
+        <ProgramModal
+          selectedProgramForView={selectedProgramForView}
+          setSelectedProgramForView={setSelectedProgramForView}
+        />
+      )}
     </div>
   );
 };

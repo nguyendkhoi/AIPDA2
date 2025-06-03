@@ -1,11 +1,18 @@
 import { X, Users, Calendar, Clock } from "lucide-react";
-import { useAuth } from "../../Context/AuthContext.tsx";
+import { Session } from "../../types/programs";
 
-export function ProgramModal() {
-  const { selectedProgramForView, setSelectedProgramForView } = useAuth();
+interface ProgramsDashboardProps {
+  selectedProgramForView: Session | null;
+  setSelectedProgramForView: (selectedProgram: Session | null) => void;
+}
+export const ProgramModal: React.FC<ProgramsDashboardProps> = ({
+  selectedProgramForView,
+  setSelectedProgramForView,
+}) => {
   const onClose = () => {
     setSelectedProgramForView(null);
   };
+
   if (!selectedProgramForView) return null;
 
   return (
@@ -99,4 +106,4 @@ export function ProgramModal() {
       </div>
     </div>
   );
-}
+};

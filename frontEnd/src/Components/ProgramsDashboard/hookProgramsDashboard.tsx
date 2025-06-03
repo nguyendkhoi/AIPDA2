@@ -36,31 +36,14 @@ export const hookProgramsDashboard = ({
     string | number | null
   >(null);
 
-  const { user } = useAuth();
+  const { user, setAlertInfo, alertInfo } = useAuth();
 
   const fetchAndSetWorkshops = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const rawProgrammes = await getAnimateurProgrammes();
-      const formattedWorkshops: Workshop[] = rawProgrammes.map(
-        (programme: Workshop) => ({
-          id: String(programme.id),
-          edition_du_Tour: programme.edition_du_Tour,
-          name: programme.name,
-          theme: programme.theme,
-          duration_hours: programme.duration_hours || 0,
-          description: programme.description,
-          start_date: programme.start_date,
-          nb_participants_max: programme.nb_participants_max,
-          statut: programme.status,
-          creation_date: programme.creation_date,
-          current_participant_count: programme.current_participant_count ?? 0,
-          animateur: programme.animateur,
-          title: programme.name || "",
-        })
-      );
-      setWorkshops(formattedWorkshops);
+      setWorkshops(rawProgrammes);
     } catch (e: any) {
       console.error("Erreur lors de la récupération des programmes:", e);
       const errorDetail =
@@ -96,9 +79,15 @@ export const hookProgramsDashboard = ({
 
       try {
         if (editingWorkshopId) {
-          await updateProgramme(editingWorkshopId, formData);
+          const isUpdated = await updateProgramme(editingWorkshopId, formData);
+          if (isUpdated) {
+            setAlertInfo({ message: "Mise à jour success", type: "success" });
+          }
         } else {
-          await createProgramme(formData);
+          const isCreated = await createProgramme(formData);
+          if (isCreated) {
+            setAlertInfo({ message: "Ajoute une programme", type: "success" });
+          }
         }
         fetchAndSetWorkshops(); // Refresh the list
         handleCancelForm(); // Close and reset form on success
@@ -129,6 +118,7 @@ export const hookProgramsDashboard = ({
           errorMessage = e.message;
         }
         setError(errorMessage);
+        setAlertInfo({ message: `${errorMessage}`, type: "error" });
         // Form remains open for correction
       }
     },
@@ -139,12 +129,21 @@ export const hookProgramsDashboard = ({
     async (id: string | number) => {
       if (!user) {
         setError("Utilisateur non authentifié.");
+        setAlertInfo({
+          message: "Utilisateur non authentifié.",
+          type: "error",
+        });
         return;
       }
       if (user.role !== "animateur") {
         setError(
           "Accès refusé: Seul un animateur peut supprimer des programmes."
         );
+        setAlertInfo({
+          message:
+            "Accès refusé: Seul un animateur peut supprimer des programmes.",
+          type: "error",
+        });
         return;
       }
 
@@ -152,17 +151,19 @@ export const hookProgramsDashboard = ({
         return;
 
       try {
-        await deleteProgramme(id);
+        const isDeleted = await deleteProgramme(id);
         console.log(`Programme avec ID ${id} supprimé.`);
+        if (isDeleted) {
+          setAlertInfo({ message: "La programme  est supprimé", type: "info" });
+        }
         fetchAndSetWorkshops();
       } catch (e: any) {
-        console.error("Erreur lors de la suppression:", e);
-        const errorDetail = e.response?.data?.detail || e.response?.data?.error;
-        setError(
-          errorDetail ||
-            e.message ||
-            "Une erreur est survenue lors de la suppression."
-        );
+        const errorDetail =
+          e.response?.data?.detail ||
+          e.response?.data?.error ||
+          "Une erreur est survenue lors de la suppression.";
+        setError(errorDetail);
+        setAlertInfo({ message: errorDetail, type: "error" });
       }
     },
     [user, fetchAndSetWorkshops]
@@ -240,8 +241,6 @@ export const hookProgramsDashboard = ({
     isLoading,
     error,
     editingWorkshopId,
-    // user, // UI might not need the whole user object
-    // fetchAndSetWorkshops, // Not directly called by UI
     handleFormSubmit,
     handleDeleteWorkshop,
     handleChange,

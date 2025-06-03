@@ -1,7 +1,7 @@
 import { useState, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Workshop, Session } from "../types/programs";
+import { Workshop } from "../types/programs";
 import { AuthLoginData, AuthSignupData } from "../types/auth";
 import { AlertInfo } from "../types/common";
 import { User } from "../types/user";
@@ -22,8 +22,6 @@ interface AuthContextProps {
   setAuthToken: (authToken: string | null) => void;
   userWorkshop: Workshop[];
   setUserWorkshop: (workshop: Workshop[]) => void;
-  setSelectedProgramForView: (session: Session | null) => void;
-  selectedProgramForView: Session | null;
   alertInfo: AlertInfo | null;
   setAlertInfo: (alert: AlertInfo | null) => void;
 }
@@ -40,8 +38,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userWorkshop, setUserWorkshop] = useState<Workshop[]>([]);
   const [signupError, setSignupError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedProgramForView, setSelectedProgramForView] =
-    useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("userData");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -181,8 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         authToken,
         setAuthToken,
         handleLogin,
-        setSelectedProgramForView,
-        selectedProgramForView,
+
         isSaving,
         setIsSaving,
         setAlertInfo,

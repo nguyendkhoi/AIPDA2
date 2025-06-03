@@ -1,17 +1,32 @@
 import "./App.css";
 import { Outlet } from "react-router-dom";
-import { AuthProvider } from "./Context/AuthContext";
+import { AuthProvider, useAuth } from "./Context/AuthContext";
 import NavBar from "./Components/NavBar";
-import { ProgramModal } from "./Components/Program/ProgramModal";
+import AlertMessage from "./Components/AlertMessage";
 
-function App() {
+const MainLayout = () => {
+  const { setAlertInfo, alertInfo } = useAuth();
   return (
-    <AuthProvider>
+    <>
       <NavBar />
       <main>
         <Outlet />
       </main>
-      <ProgramModal />
+      {alertInfo && (
+        <AlertMessage
+          message={alertInfo.message}
+          type={alertInfo.type}
+          onDismiss={() => setAlertInfo(null)}
+        />
+      )}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <MainLayout />
     </AuthProvider>
   );
 }

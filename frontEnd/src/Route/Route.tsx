@@ -10,6 +10,7 @@ import DashBoardRoute from "./RouteProtected/DashBoardRoute.tsx";
 import ProgramsDashBoardRoute from "./RouteProtected/ProgramsDashBoardRoute.tsx";
 import CommunityPage from "../Components/Communaute/CommutyPages.tsx";
 import AuthentificationRoute from "./RouteProtected/AuthentificationRoute.tsx";
+import AdminRoute from "./RouteProtected/AdminRoute.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
             element: <Connexion />,
           },
         ],
+      },
+      {
+        path: "admin",
+        element: <AdminRoute />,
       },
     ],
     errorElement: <p>Erreur 404</p>,

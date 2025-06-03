@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics, status, viewsets
-from .permissions import IsAnimateur, IsParticipant, IsAnimateurOwnerOrReadOnly, IsAnimateurOrParticipantReadOnly
-from .serializers import UserSerializers, ProgrammeSerializers, RegistrationSerializers, UserProfileSerializers, UserCommunitySerializers
+from .permissions import IsAnimateur, IsParticipant, IsAnimateurOwnerOrReadOnly, IsAdmin
+from .serializers import UserSerializers, ProgrammeSerializers, RegistrationSerializers, UserProfileSerializers, UserCommunitySerializers, ProgrammeDetailSerializer
 from .models import User, Programme, Registration
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -84,7 +84,7 @@ class ProgrammeView(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [IsAuthenticated, IsAnimateur]
         elif self.action in ['update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsAnimateurOwnerOrReadOnly]
+            permission_classes = [IsAuthenticated, (IsAdmin | IsAnimateurOwnerOrReadOnly)]
         elif self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         elif self.action in ['add_participant', 'remove_participant']:
@@ -99,6 +99,7 @@ class ProgrammeView(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(animateur=self.request.user)
+        return Response(status=status.HTTP_201_CREATED)
 
 
     @action(detail=True, methods=['post'])
@@ -162,11 +163,21 @@ class ProgrammeView(viewsets.ModelViewSet):
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         except serializers.ValidationError as e:
              return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
              return Response({"detail": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DetailedProgramView(APIView):
+    permission_classes = [IsAdmin]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        programmes = Programme.objects.all()
+        serializer = ProgrammeDetailSerializer(programmes, many=True) 
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]

@@ -97,7 +97,7 @@ class UserProfileSerializers(serializers.ModelSerializer):
     def get_expertises(self, instance):
 
         return [expertise.name for expertise in instance.expertises.all()]
-    
+
     def update(self, instance, validated_data):
         # Mettre à jour 'nom' et 'bio' normalement
         instance.name = validated_data.get('name', instance.name)
@@ -134,14 +134,13 @@ class ProgrammeSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Programme
-        fields = ['id', 'name', 'animateur', 'statut', 'edition_du_Tour', 'current_participant_count',
-                  'nb_participants_max', 'duration_hours', 
-                  'theme', 'start_date', 'description', 'creation_date']
+        fields = ['id', 'name', 'animateur', 'status', 'edition_du_Tour', 'current_participant_count',
+                  'nb_participants_max', 'duration_hours', 'theme', 'start_date', 'description']
         extra_kwargs = {
             'id': {'read_only': True},
-            'statut': {'required': False}
+            'status': {'required': False}
             }
-        
+
     def validate_name(self, value):
         if not value:
             raise serializers.ValidationError("Le nom du programme est requis.")
@@ -150,8 +149,10 @@ class ProgrammeSerializers(serializers.ModelSerializer):
         return value
     
     def validate(self, data):
-        if data['nb_participants_max'] < 0:
-            raise serializers.ValidationError("Le nombre de participants maximum ne peut pas être négatif.")
+        if 'nb_participants_max' in data:
+            if data['nb_participants_max'] < 0:
+                raise serializers.ValidationError("Le nombre de participants maximum ne peut pas être négatif.")
+            
         return data
     
     def create(self, validated_data):
@@ -160,30 +161,14 @@ class ProgrammeSerializers(serializers.ModelSerializer):
     
     def get_name(self, obj):
         return obj.get_name_display()
-    
-class ProgrammeSpecificSerializer(serializers.ModelSerializer):
-    participants = NestedUserSerializer(many=True, read_only=True)
-    name = serializers.SerializerMethodField()
+
+class ProgrammeDetailSerializer(serializers.ModelSerializer):
+    animateur = UserDetailSerializer()
 
     class Meta:
         model = Programme
-        fields = [
-            'name',
-            'edition_du_Tour',
-            'nb_participants_max', 
-            'current_participant_count',  
-            'participants',          
-            'duration_hours',
-            'theme',
-            'start_date',
-            'description',
-            'creation_date',
-            'statut',
-        ]
-
-    def get_name(self, obj):
-        return obj.get_name_display()
-
+        fields = ['id', 'name', 'animateur', 'status', 'edition_du_Tour', 'current_participant_count',
+                  'nb_participants_max', 'duration_hours', 'theme', 'start_date', 'description', 'creation_date']
 
 class NestedProgramme(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -195,12 +180,12 @@ class NestedProgramme(serializers.ModelSerializer):
 
     def get_name(self, obj):
         return obj.get_name_display()
-    
+
 # Registration
 class RegistrationSerializers(serializers.ModelSerializer):
     programme = NestedProgramme(read_only=True)
 
     class Meta:
         model = Registration
-        fields = ['programme', "statut", "date_inscription"]
+        fields = ['programme', "status", "date_inscription"]
         read_only_fields = fields
