@@ -22,19 +22,7 @@ class UserView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
-        if not serializer.is_valid():
-            
-            error_messages = []
-            for field_key, messages_list in serializer.errors.items():
-                for message in messages_list:
-                    error_messages.append(str(message))
-
-            final_error_message = error_messages[0] if error_messages else "Une erreur de validation est survenue."
-            
-            return Response({
-                "detail": final_error_message 
-            }, status=status.HTTP_400_BAD_REQUEST)
-
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"status": "Succes"}, status=status.HTTP_201_CREATED)
 
@@ -60,7 +48,6 @@ class LoginView(ObtainAuthToken):
         
         print(f"User {user.email} logged in successfully")
         token, created = Token.objects.get_or_create(user=user)
-
 
         response_data = {
             'token': token.key,
@@ -89,8 +76,6 @@ class ProgrammeView(viewsets.ModelViewSet):
             permission_classes = [AllowAny]
         elif self.action in ['add_participant', 'remove_participant']:
             permission_classes = [IsAuthenticated]
-        elif self.action == 'get_participant_programmes':
-            permission_classes = [IsAuthenticated, IsParticipant]
         elif self.action == 'get_animateur_programmes':
             permission_classes = [IsAuthenticated, IsAnimateur]
         else:
@@ -101,6 +86,10 @@ class ProgrammeView(viewsets.ModelViewSet):
         serializer.save(animateur=self.request.user)
         return Response(status=status.HTTP_201_CREATED)
 
+    def list(self, request, *args, **kwargs):
+        programmes = Programme.objects.filter(status="confirmed")
+        serializer = self.get_serializer(programmes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
     def register_for_programme(self, request, pk=None):
@@ -110,10 +99,10 @@ class ProgrammeView(viewsets.ModelViewSet):
         if programme.current_participant_count >= programme.nb_participants_max:
              return Response({'status': 'Le programme est complet'}, status=status.HTTP_400_BAD_REQUEST)
         
-        if Registration.objects.filter(participant=user, programme=programme, statut="inscrit"):
+        if Registration.objects.filter(participant=user, programme=programme, status="inscrit"):
                         return Response({'status': 'Utilisateur déjà inscrit'}, status=status.HTTP_400_BAD_REQUEST)
 
-        Registration.objects.get_or_create(participant=user, programme=programme, defaults={'statut': 'inscrit'})
+        Registration.objects.get_or_create(participant=user, programme=programme, defaults={'status': 'inscrit'})
         return Response({'status': 'Inscription réussie'}, status=status.HTTP_201_CREATED)
 
         
@@ -124,20 +113,12 @@ class ProgrammeView(viewsets.ModelViewSet):
 
         try:
             registration = Registration.object.filter(participant=user, programme=programme)
-            registration.statut = "annule"
+            registration.status = "annule"
             registration.save()
 
             return Response({'status': 'Annule le programme successemet.'}, status=status.HTTP_200_OK)
         except registration.DoeNotExist:
             return Response({'stauts': "Vous ne vous êtes pas inscrit à ce programme ou vous l'avez déjà annulé."}, status=status.HTTP_400_BAD_REQUEST)
-
-        
-    @action(detail=False, methods=['get'], url_path='participant-programmes')
-    def get_participant_programmes(self, request):
-        user = request.user
-        registrations = Registration.objects.filter(participant=user).select_related('programme')
-        serializer = RegistrationSerializers(registrations, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'], url_path='animateur-programmes')
     def get_animateur_programmes(self, request):
@@ -149,8 +130,8 @@ class ProgrammeView(viewsets.ModelViewSet):
     
     def destroy(self, request, pk=None):
         programme = self.get_object()
-        programme.statut='annule'
-        programme.registrations.filter(statut__in=['inscrit', 'en_cours']).update(statut='annule')
+        programme.status='annule'
+        programme.registrations.filter(statut__in=['inscrit', 'en_cours']).update(status='annule')
         return Response({"status": "Le programme a été annulé"}, status=status.HTTP_204_NO_CONTENT)
         
     def patch(self, request, pk=None):
@@ -169,15 +150,11 @@ class ProgrammeView(viewsets.ModelViewSet):
         except Exception as e:
              return Response({"detail": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class DetailedProgramView(APIView):
+class DetailedProgramView(generics.ListAPIView):
     permission_classes = [IsAdmin]
     authentication_classes = [TokenAuthentication]
-
-    def get(self, request):
-        programmes = Programme.objects.all()
-        serializer = ProgrammeDetailSerializer(programmes, many=True) 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
+    serializer_class = ProgrammeDetailSerializer
+    queryset = Programme.objects.all()
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -191,38 +168,22 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class ProfileView(APIView):
+class ProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-    def get(self, request):
-        user = request.user
-        serializer = UserProfileSerializers(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer_class = UserProfileSerializers
+
+    def get_object(self):
+        return self.request.user
     
-    def patch(self, request):
-        user = request.user
-        print(f"REQUEST_DATA_VIEW: {request.data}")
-
-        serializer = UserProfileSerializers(user, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            response_serializer = UserProfileSerializers(user)
-            return Response(response_serializer.data, status=status.HTTP_200_OK)
-        else:
-            print(f"SERIALIZER_ERRORS_IN_VIEW: {serializer.errors}")
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class RegistrationView(APIView):
+class RegistrationView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
+    serializer_class = RegistrationSerializers
 
-    def get(self, request):
-        user = request.user
-        registrations = Registration.objects.filter(participant=user)\
-                                           .select_related('programme')
-        serializer = RegistrationSerializers(registrations, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self, request):
+        user = self.request.user
+        return Registration.objects.filter(participant=user).select_related("programme")
 
 class UserCommunityView(APIView):    
     def get(self, request):

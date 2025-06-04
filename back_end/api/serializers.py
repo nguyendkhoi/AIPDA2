@@ -1,12 +1,28 @@
 from rest_framework import serializers
 from .models import User, Programme, Registration, Expertise
+from django.contrib.auth import authenticate
+from django.utils.translation import gettext_lazy as _
 
 # User
-class NestedUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'email', 'first_name', 'name', 'role', 'photo']
-        read_only_fields = fields
+class EmailAuthTokenSerializer(serializers.Serializer):
+    email = serializers.CharField(label=_("Email"))
+    password = serializers.CharField(label=_("Password"),
+                                     style={'input_type': "password"},
+                                     trim_whitespace=False)
+    
+    def validate(self, attrs):
+        email = attrs['email']
+        password = attrs['password']
+
+        user = authenticate(request=self.context.get('request'), 
+                            email=email, password=password)
+        
+        if not user:
+            msg = _('Unable to log in with provided credentials.')
+            raise serializers.ValidationError(msg, code='authorization')
+        
+        attrs['user'] = user
+        return attrs
 
 class UserSerializers(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
@@ -126,19 +142,25 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'role', 'telephone', 'pays_residence', 'bio','expertises', 'profession', 'organisation', 
                   'lien_portfolio', 'creation_date']
         read_only_fields = fields
+
+class NestedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'name', 'role', 'photo']
+        read_only_fields = fields
         
 # Programme
 class ProgrammeSerializers(serializers.ModelSerializer):
     animateur = NestedUserSerializer(read_only=True)
-    name = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = Programme
         fields = ['id', 'name', 'animateur', 'status', 'edition_du_Tour', 'current_participant_count',
                   'nb_participants_max', 'duration_hours', 'theme', 'start_date', 'description']
         extra_kwargs = {
             'id': {'read_only': True},
-            'status': {'required': False}
+            'status': {'required': False},
+            'current_participant_count': {'read_only': True}
             }
 
     def validate_name(self, value):
@@ -158,9 +180,6 @@ class ProgrammeSerializers(serializers.ModelSerializer):
     def create(self, validated_data):
         programme = Programme.objects.create(**validated_data)
         return programme
-    
-    def get_name(self, obj):
-        return obj.get_name_display()
 
 class ProgrammeDetailSerializer(serializers.ModelSerializer):
     animateur = UserDetailSerializer()

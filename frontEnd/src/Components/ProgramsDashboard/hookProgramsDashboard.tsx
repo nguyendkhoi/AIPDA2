@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-  FormEvent,
-  ChangeEvent,
-  useMemo,
-} from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { WorkshopFormData, Workshop, Edition } from "../../types/programs.ts";
 import { useAuth } from "../../Context/AuthContext.tsx";
 import {
@@ -15,28 +8,28 @@ import {
   deleteProgramme,
 } from "../../api/programs.ts";
 
-interface UseProgramsDashboardProps {
-  initialFormData: WorkshopFormData;
-  initialSelectedEdition: Edition;
-}
+const initialWorkshopFormData: WorkshopFormData = {
+  edition_du_Tour: "Avril 2025",
+  name: "",
+  theme: "Design Thinking",
+  description: "",
+  start_date: "",
+  nb_participants_max: 50,
+};
 
-export const hookProgramsDashboard = ({
-  initialFormData,
-  initialSelectedEdition,
-}: UseProgramsDashboardProps) => {
+export const hookProgramsDashboard = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedEdition, setSelectedEdition] = useState<Edition>(
-    initialSelectedEdition
-  );
-  const [formData, setFormData] = useState<WorkshopFormData>(initialFormData);
+  const [currentWorkshopDataForModal, setCurrentWorkshopDataForModal] =
+    useState<WorkshopFormData>(initialWorkshopFormData);
+  const [selectedEdition, setSelectedEdition] = useState<Edition>("Avril 2025");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingWorkshopId, setEditingWorkshopId] = useState<
     string | number | null
   >(null);
 
-  const { user, setAlertInfo, alertInfo } = useAuth();
+  const { user, setAlertInfo } = useAuth();
 
   const fetchAndSetWorkshops = useCallback(async () => {
     setIsLoading(true);
@@ -58,39 +51,43 @@ export const hookProgramsDashboard = ({
     } finally {
       setIsLoading(false);
     }
-  }, []); // Removed `user` dependency as it's not directly used here, but rather in useEffect
+  }, []);
 
   const handleCancelForm = useCallback(() => {
     setIsFormOpen(false);
-    setFormData(initialFormData);
+    setCurrentWorkshopDataForModal(initialWorkshopFormData);
     setError(null);
     setEditingWorkshopId(null);
-  }, [initialFormData]);
+  }, []);
 
   const handleFormSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
+    async (submittedFormData: WorkshopFormData) => {
       setError(null);
 
       if (!user) {
         setError("Utilisateur non authentifié.");
         return;
       }
-
       try {
         if (editingWorkshopId) {
-          const isUpdated = await updateProgramme(editingWorkshopId, formData);
+          const isUpdated = await updateProgramme(
+            editingWorkshopId,
+            submittedFormData
+          );
           if (isUpdated) {
-            setAlertInfo({ message: "Mise à jour success", type: "success" });
+            setAlertInfo({ message: "Mise à jour réussie", type: "success" });
           }
         } else {
-          const isCreated = await createProgramme(formData);
+          const isCreated = await createProgramme(submittedFormData);
           if (isCreated) {
-            setAlertInfo({ message: "Ajoute une programme", type: "success" });
+            setAlertInfo({
+              message: "Programme ajouté avec succès",
+              type: "success",
+            });
           }
         }
-        fetchAndSetWorkshops(); // Refresh the list
-        handleCancelForm(); // Close and reset form on success
+        await fetchAndSetWorkshops();
+        handleCancelForm();
       } catch (e: any) {
         console.error(
           `Erreur lors de ${
@@ -98,31 +95,28 @@ export const hookProgramsDashboard = ({
           } du programme:`,
           e
         );
-        let errorMessage = `Une erreur est survenue lors de ${
-          editingWorkshopId ? "la mise à jour" : "la création"
-        }.`;
-        if (e.response && e.response.data) {
-          const errorData = e.response.data;
-          const fieldErrors = Object.entries(errorData)
-            .map(
-              ([key, value]) =>
-                `${key}: ${Array.isArray(value) ? value.join(", ") : value}`
-            )
-            .join("; ");
-          if (fieldErrors) {
-            errorMessage = fieldErrors;
-          } else if (errorData.detail) {
-            errorMessage = errorData.detail;
-          }
-        } else if (e.message) {
-          errorMessage = e.message;
-        }
+        const errorDetail =
+          e.response?.data?.detail ||
+          e.response?.data?.error ||
+          e.response?.data?.non_field_errors?.[0] ||
+          e.message;
+
+        let errorMessage =
+          errorDetail ||
+          `Une erreur est survenue lors de ${
+            editingWorkshopId ? "la mise à jour" : "la création"
+          }.`;
+
         setError(errorMessage);
-        setAlertInfo({ message: `${errorMessage}`, type: "error" });
-        // Form remains open for correction
       }
     },
-    [user, editingWorkshopId, formData, fetchAndSetWorkshops, handleCancelForm]
+    [
+      user,
+      editingWorkshopId,
+      fetchAndSetWorkshops,
+      handleCancelForm,
+      setAlertInfo,
+    ]
   );
 
   const handleDeleteWorkshop = useCallback(
@@ -136,9 +130,6 @@ export const hookProgramsDashboard = ({
         return;
       }
       if (user.role !== "animateur") {
-        setError(
-          "Accès refusé: Seul un animateur peut supprimer des programmes."
-        );
         setAlertInfo({
           message:
             "Accès refusé: Seul un animateur peut supprimer des programmes.",
@@ -152,53 +143,29 @@ export const hookProgramsDashboard = ({
 
       try {
         const isDeleted = await deleteProgramme(id);
-        console.log(`Programme avec ID ${id} supprimé.`);
         if (isDeleted) {
-          setAlertInfo({ message: "La programme  est supprimé", type: "info" });
+          setAlertInfo({
+            message: "Le programme a été supprimé",
+            type: "info",
+          });
         }
-        fetchAndSetWorkshops();
+        await fetchAndSetWorkshops();
       } catch (e: any) {
         const errorDetail =
-          e.response?.data?.detail ||
           e.response?.data?.error ||
           "Une erreur est survenue lors de la suppression.";
-        setError(errorDetail);
         setAlertInfo({ message: errorDetail, type: "error" });
       }
     },
-    [user, fetchAndSetWorkshops]
-  );
-
-  const handleChange = useCallback(
-    (
-      e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => {
-      const { name, value, type } = e.target;
-      let processedValue: string | number | undefined = value;
-
-      if (type === "number") {
-        if (value === "") {
-          processedValue = undefined; // Or keep as empty string if your WorkshopFormData allows for nb_participants_max
-        } else {
-          const num = parseInt(value, 10);
-          processedValue = isNaN(num)
-            ? name === "nb_participants_max"
-              ? undefined
-              : 0
-            : num; // Fallback to undefined for nb_participants_max to trigger required or use 0 for other potential number fields
-        }
-      }
-      setFormData((prevData) => ({ ...prevData, [name]: processedValue }));
-    },
-    []
+    [user, fetchAndSetWorkshops, setAlertInfo]
   );
 
   const handleOpenFormForCreate = useCallback(() => {
     setEditingWorkshopId(null);
-    setFormData(initialFormData);
+    setCurrentWorkshopDataForModal(initialWorkshopFormData);
     setError(null);
     setIsFormOpen(true);
-  }, [initialFormData]);
+  }, []);
 
   const handleOpenFormForEdit = useCallback((workshop: Workshop) => {
     setEditingWorkshopId(workshop.id);
@@ -206,7 +173,7 @@ export const hookProgramsDashboard = ({
       ? workshop.start_date.split("T")[0]
       : "";
 
-    setFormData({
+    setCurrentWorkshopDataForModal({
       edition_du_Tour: workshop.edition_du_Tour,
       name: workshop.name,
       theme: workshop.theme,
@@ -231,23 +198,22 @@ export const hookProgramsDashboard = ({
     return workshops.filter(
       (workshop) => workshop.edition_du_Tour === selectedEdition
     );
-  }, [workshops, selectedEdition]);
+  }, [selectedEdition, workshops]);
 
   return {
-    workshops, // raw workshops, might not be needed by UI if filteredWorkshops is always used
+    workshops,
     isFormOpen,
-    selectedEdition,
-    formData,
+    formData: currentWorkshopDataForModal,
     isLoading,
     error,
     editingWorkshopId,
+    setSelectedEdition,
+    selectedEdition,
     handleFormSubmit,
     handleDeleteWorkshop,
-    handleChange,
     handleOpenFormForCreate,
     handleOpenFormForEdit,
     handleCancelForm,
-    setSelectedEdition,
     filteredWorkshops,
   };
 };

@@ -75,7 +75,6 @@ class Programme(models.Model):
         ('talk', 'Talk')
     ]
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('terminated', 'Terminated'),
         ('in_progress', 'In progress'),
@@ -85,7 +84,7 @@ class Programme(models.Model):
     theme = models.CharField(max_length=100, blank=True, null=True)
     animateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='programmes_animateur')
     edition_du_Tour = models.CharField(max_length=20, blank=True, null=True)
-    status = models.CharField(max_length=20, default='en_attente', choices=STATUS_CHOICES)  # 'en_attente', 'confirme', 'annule'
+    status = models.CharField(max_length=20, default='in_progress', choices=STATUS_CHOICES)
     nb_participants_max = models.PositiveIntegerField(default=0)
     duration_hours = models.IntegerField(default=0)
     start_date = models.DateTimeField()

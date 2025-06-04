@@ -19,10 +19,7 @@
   box-sizing: border-box;
 }
 
-.input-field:focus {
-  border-color: var(--color-input);
-}
-
+.input-field:focus,
 .input-field.active,
 .input-field:-webkit-autofill {
   border-color: var(--color-input);
@@ -33,12 +30,11 @@
   top: 50%;
   left: 1rem;
   transform: translateY(-50%);
-  color: #777;
   font-size: 1rem;
   pointer-events: none;
   transition: all 0.3s ease;
   background-color: white;
-  padding-inline: 4px;
+  padding: 4px;
 }
 
 .input-label.active,
@@ -46,13 +42,10 @@
   top: 0;
   font-size: 0.75rem;
   color: var(--color-input);
-  transform: translateY(-50%);
 }
 .input-field:-webkit-autofill,
 .input-field:-webkit-autofill:hover,
 .input-field:-webkit-autofill:focus,
 .input-field:-webkit-autofill:active {
-  -webkit-text-fill-color: currentColor;
   -webkit-box-shadow: 0 0 0px 1000px white inset;
-  transition: background-color 5000s ease-in-out 0s;
 }

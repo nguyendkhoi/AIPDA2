@@ -25,7 +25,6 @@ urlpatterns= [
     # Custom actions for ProgrammeView
     path('programme/<int:pk>/registrations/', views.ProgrammeView.as_view({'post': 'register_for_programme'}), name='register_for_programme'),
     path('programme/<int:pk>/remove_participant/', views.ProgrammeView.as_view({'post': 'unregister_from_programme'}), name='unregister_from_programme'),
-    path('programme/participant_programmes/', views.ProgrammeView.as_view({'get': 'get_participant_programmes'}), name='get_participant_programmes'),
     path('programme/animateur_programmes/', views.ProgrammeView.as_view({'get': 'get_animateur_programmes'}), name='get_animateur_programmes'),
     path('programme/admin/detailed/', views.DetailedProgramView.as_view(), name='detail_program'),
     # Registration view

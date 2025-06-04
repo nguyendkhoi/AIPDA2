@@ -31,29 +31,31 @@ export default function Connexion() {
   };
 
   return (
-    <div className="pt-32 px-4 max-w-7xl mx-auto w-1/2">
-      <h2 className="text-5xl mb-6 ">Se connecter</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-3">
-          <Input
-            type="email"
-            placeholder="Email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Mot de passe"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="px-4 max-w-7xl mx-auto w-1/2 justify-self-center">
+        <h2 className="text-5xl mb-6 ">Se connecter</h2>
+        <form onSubmit={handleSubmit} className="mb-5">
+          <div className="flex flex-col gap-3">
+            <Input
+              type="email"
+              placeholder="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Mot de passe"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <Button type="submit">Se Connecter</Button>
+        </form>
         {signupError && <p className="text-red-500">{signupError}</p>}
-        <Button type="submit">Se Connecter</Button>
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Vous avez pas de compte ?{" "}
@@ -66,7 +68,7 @@ export default function Connexion() {
             </button>
           </p>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

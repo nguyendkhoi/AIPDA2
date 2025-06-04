@@ -73,8 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error: any) {
       console.error("Error during login:", error);
       let errorMessage = "Une erreur s'est produite lors de la connexion.";
-      if (error.response.data.detail) {
-        errorMessage = error.response.data.detail;
+      if (error.response.data.error) {
+        errorMessage = error.response.data.error;
       }
       setSignupError(errorMessage);
       setAlertInfo({ message: errorMessage, type: "error" });

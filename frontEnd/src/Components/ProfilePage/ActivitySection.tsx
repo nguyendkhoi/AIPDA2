@@ -61,10 +61,10 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                   <span
                     // Affichage du statut avec couleur dynamique
                     className={`px-3 py-1 rounded-full text-sm ${getStatutColor(
-                      reg.statut
+                      reg.status
                     )}`}
                   >
-                    {getStatutText(reg.statut)}
+                    {getStatutText(reg.status)}
                   </span>
                 </div>
                 {/* Afficher la date d'inscription  */}
@@ -103,10 +103,10 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                 <div>
                   <p // Affichage du statut avec couleur dynamique
                     className={`flex justify-center px-3 py-1 rounded-full text-sm ${getStatutColor(
-                      proposal.statut
+                      proposal.status
                     )}`}
                   >
-                    {getStatutText(proposal.statut)}
+                    {getStatutText(proposal.status)}
                   </p>
                   <p
                     className={`inline-flex px-3 py-1 rounded-full text-sm mt-2 bg-gray-100`}

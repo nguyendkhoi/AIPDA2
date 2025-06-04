@@ -7,7 +7,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export default function Input({
-  type,
+  type = "text",
   placeholder,
   name,
   autocomplete,
