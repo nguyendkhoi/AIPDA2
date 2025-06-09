@@ -22,6 +22,7 @@ const THEMES: string[] = [
 
 interface WorkshopFormData {
   edition_du_Tour: string;
+  title: string;
   nom: string;
   theme: string;
   description: string;
@@ -31,6 +32,7 @@ interface WorkshopFormData {
 
 const initialFormData: WorkshopFormData = {
   edition_du_Tour: EDITIONS[1] || EDITIONS[0], // Mặc định edition thứ 2 hoặc 1
+  title: "",
   nom: "",
   theme: "",
   description: "",
@@ -266,6 +268,7 @@ const ProgramsDashboard: React.FC = () => {
     setFormData({
       // Populate form with current workshop data
       edition_du_Tour: workshop.edition_du_Tour,
+      title: workshop.title,
       nom: workshop.nom,
       theme: workshop.theme,
       description: workshop.description,
@@ -351,6 +354,9 @@ const ProgramsDashboard: React.FC = () => {
                     Programme
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Titre
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date Début
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -370,6 +376,9 @@ const ProgramsDashboard: React.FC = () => {
                     <tr key={workshop.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {workshop.nom}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {workshop.title}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {workshop.date_de_debut
@@ -469,6 +478,22 @@ const ProgramsDashboard: React.FC = () => {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="titre"
+                  className="block text-sm font-medium border-gray-300 text-gray-700"
+                >
+                  Titre
+                </label>
+                <input
+                  id="titre"
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="border-gray-300 border rounded-md w-full pl-2"
+                />
               </div>
               <div>
                 <label
