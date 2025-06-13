@@ -106,6 +106,9 @@ const ProgramsDashboard: React.FC = () => {
                       Programme
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Titre
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Date Début
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -128,6 +131,9 @@ const ProgramsDashboard: React.FC = () => {
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
                           {workshop.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {workshop.title}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {workshop.start_date

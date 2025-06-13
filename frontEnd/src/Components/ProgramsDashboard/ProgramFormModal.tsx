@@ -89,6 +89,23 @@ const ProgramFormModal: React.FC<ProgramFormModalProps> = ({
               ))}
             </select>
           </div>
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Titre
+            </label>
+            <input
+              id="title"
+              type="text"
+              name="title"
+              value={currentFormData.title}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
 
           <div>
             <label

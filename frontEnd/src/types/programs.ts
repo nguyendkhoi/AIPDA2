@@ -43,6 +43,7 @@ export interface ReservationResponse {
 
 export interface WorkshopFormData {
   edition_du_Tour: string;
+  title: string;
   name: string;
   theme: string;
   description: string;

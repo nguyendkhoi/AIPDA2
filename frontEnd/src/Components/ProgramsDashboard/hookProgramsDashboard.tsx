@@ -176,6 +176,7 @@ export const hookProgramsDashboard = () => {
     setCurrentWorkshopDataForModal({
       edition_du_Tour: workshop.edition_du_Tour,
       name: workshop.name,
+      title: workshop.title,
       theme: workshop.theme,
       description: workshop.description,
       start_date: dateForInput,
