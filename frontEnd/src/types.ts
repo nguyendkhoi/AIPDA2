@@ -43,7 +43,7 @@ export interface Workshop {
   edition_du_Tour: string; // Correspond à `campaign_month`
   nom: string; // Correspond à `type`
   theme: string; // Correspond à `subtype`
-  title: string; // Ajout pour `title`
+  titre: string; // Ajout pour `title`
   description: string; // Ajout pour `description`
   nb_participants_max: number; // Correspond à `max_participants`
   nb_participants_actuel: number; // Correspond à `nb_participants_actuel`

@@ -60,7 +60,7 @@ class ProgrammeSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Programme
-        fields = ['id', 'nom', 'animateur', 'statut', 'edition_du_Tour', 'nb_participants_actuel',
+        fields = ['id', 'nom', 'animateur','statut', 'edition_du_Tour', 'nb_participants_actuel',
                   'nb_participants_max', 'participants', 'temps_de_participation', 
                   'theme', 'date_de_debut', 'description', 'date_de_creation']
         extra_kwargs = {
@@ -99,6 +99,7 @@ class ProgrammeSpecificSerializer(serializers.ModelSerializer):
         model = Programme
         fields = [
             'nom',
+            
             'edition_du_Tour',
             'nb_participants_max', 
             'nb_participants_actuel',  
